@@ -9,7 +9,7 @@ class UserManager(BaseUserManager):
         roles = [self.SUPERUSER, self.STAFF]
         return role is None or role.lower() in roles
 
-    def _create_user(self, email, password, **extra_fields):
+    def _create_user(self, email, password=None, **extra_fields):
         """
         Creates and saves a User with the given email and password.
         """
@@ -21,7 +21,7 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_user(self, email, password, role=None, **extra_fields):
+    def create_user(self, email, password=None, role=None, **extra_fields):
         if role is not None:
             role = role.lower()
             if not self._is_valid_role(role):
