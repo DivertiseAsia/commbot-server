@@ -49,6 +49,12 @@ urlpatterns = [
     path("api/v1/", include((router_v1.urls, "api"), namespace="v1")),
     path("accounts/", include("rest_framework.urls", namespace="rest_framework")),
     path(
+        "api/v1/social-auth/", include("social_django.urls", namespace="social")
+    ),  # for server based login; otherwise can remove
+    path(
+        "api/v1/social-auth/oauth-login/", include("rest_social_auth.urls_token")
+    ),  # for app based login; otherwise can remove
+    path(
         "api/v1/auth/reset/",
         include("django_rest_passwordreset.urls", namespace="password_reset"),
     ),

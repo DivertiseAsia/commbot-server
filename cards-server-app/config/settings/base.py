@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     "health_check.storage",
     "django_rest_passwordreset",
     "corsheaders",
+    "social_django",
+    "rest_social_auth",  # required for Frontend social auth; if server only can remove
     "config",
     "user_manager",
 ]
@@ -66,6 +68,13 @@ MIDDLEWARE = [
 
 AUTH_USER_MODEL = "user_manager.User"
 
+AUTHENTICATION_BACKENDS = (
+    "social_core.backends.open_id.OpenIdAuth",
+    "social_core.backends.google.GoogleOAuth2",
+    "social_core.backends.google.GoogleOAuth",
+    "django.contrib.auth.backends.ModelBackend",
+)
+
 ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
@@ -79,6 +88,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "social_django.context_processors.backends",
+                "social_django.context_processors.login_redirect",
             ],
         },
     },
@@ -145,3 +156,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 FRONTEND_URL = "http://localhost:8080"
 DEFAULT_FROM_EMAIL = "support@divertise.asia"
 SUPER_ADMIN_PASS = os.environ.get("SUPER_ADMIN_PASS")
+
+SOCIAL_AUTH_JSONFIELD_ENABLED = True
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY")
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET")

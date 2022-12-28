@@ -1,5 +1,8 @@
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.template.response import TemplateResponse
+from django.urls import path
 
 from import_export.admin import ImportMixin, ImportExportModelAdmin
 from import_export import resources
@@ -43,6 +46,25 @@ class UserAdminView(ImportMixin, BaseUserAdmin):
     search_fields = ("email",)
     ordering = ("email",)
     filter_horizontal = ()
+
+    def get_urls(self):
+        urls = super().get_urls()
+        if settings.DEBUG:
+            my_urls = [
+                path("social_login_test", self.social_login_test),
+            ]
+            return my_urls + urls
+        else:
+            return urls
+
+    def social_login_test(self, request):
+        # used to test and show social login from server
+        # should be something like /admin/user_manager/user/social_login_test
+        return TemplateResponse(
+            request,
+            "admin/social_login_test.html",
+            {},
+        )
 
 
 class ProfileResource(resources.ModelResource):
