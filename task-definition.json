@@ -1,0 +1,84 @@
+[
+    {
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "${AWS_LOGS_GROUP}",
+          "awslogs-region": "${AWS_DEFAULT_REGION}",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "entryPoint": [
+        "sh",
+        "-c"
+      ],
+      "portMappings": [
+        {
+          "hostPort": 0,
+          "protocol": "tcp",
+          "containerPort": 8000
+        }
+      ],
+      "command": [
+        "${START_CMD}"
+      ],
+      "cpu": ${CPU_RESERVATION},
+      "environment": [
+        {
+            "name": "RDS_HOST",
+            "value": "${RDS_HOST}"
+        },
+        {
+            "name": "RDS_USERNAME",
+            "value": "${RDS_USERNAME}"
+        },
+        {
+            "name": "RDS_PASSWORD",
+            "value": "${RDS_PASSWORD}"
+        },
+        {
+            "name": "RDS_DB_NAME",
+            "value": "${RDS_DB_NAME}"
+        },
+        {
+            "name": "DJANGO_SETTINGS_MODULE",
+            "value": "${DJANGO_SETTINGS_MODULE}"
+        },
+        {
+            "name": "DJANGO_SECRET_KEY",
+            "value": "${DJANGO_SECRET_KEY}"
+        },
+        {
+            "name": "AWS_S3_ACCESS_KEY_ID",
+            "value": "${AWS_S3_ACCESS_KEY_ID}"
+        },
+        {
+            "name": "AWS_S3_SECRET_ACCESS_KEY",
+            "value": "${AWS_S3_SECRET_ACCESS_KEY}"
+        },
+        {
+            "name": "AWS_SES_ACCESS_KEY_ID",
+            "value": "${AWS_SES_ACCESS_KEY_ID}"
+        },
+        {
+            "name": "AWS_SES_SECRET_ACCESS_KEY",
+            "value": "${AWS_SES_SECRET_ACCESS_KEY}"
+        },
+        {
+            "name": "AWS_SES_REGION_NAME",
+            "value": "${AWS_SES_REGION_NAME}"
+        },
+        {
+            "name": "SUPER_ADMIN_PASS",
+            "value": "${SUPER_ADMIN_PASS}"
+        }
+      ],
+      "mountPoints": [],
+      "workingDirectory": "/usr/src/app",
+      "memoryReservation": ${MEMORY_RESERVATION},
+      "volumesFrom": [],
+      "image": "${REPOSITORY_URL}:${VERSION_TAG}",
+      "name": "${PROJECT_NAME}-server"
+    }
+  ]
+  

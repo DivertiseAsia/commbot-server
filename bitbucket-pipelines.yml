@@ -25,9 +25,12 @@ definitions:
           - coverage run --rcfile=.coveragerc manage.py test
           - coverage html
           - git archive --output=./application.tar.gz --format=tar HEAD .
+          - apt update
+          - apt -y install zip
+          - zip -r codecoverage.zip htmlcov/
         artifacts:
-          - coverage_html
-          - application.tar.gz
+          - cards-server-app/codecoverage.zip
+          - cards-server-app/application.tar.gz
         services:
           - postgres
     - step: &deployheroku
@@ -38,6 +41,35 @@ definitions:
               HEROKU_API_KEY: $HEROKU_API_KEY
               HEROKU_APP_NAME: $HEROKU_APP_NAME
               ZIP_FILE: "application.tar.gz"
+    - step: &deployaws
+        name: Deploy via AWS
+        image: docker:latest
+        services:
+          - docker
+        script:
+          - apk add --no-cache curl py-pip gettext jq
+          - pip install awscli
+          - aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
+          - aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
+          - aws configure set region ${AWS_DEFAULT_REGION}
+          - $(aws ecr get-login --no-include-email --region "${AWS_DEFAULT_REGION}")
+          - echo "Building image..."
+          - docker build -t ${REPOSITORY_URL}:latest ./cards-server-app
+          - echo "Tagging image..."
+          - docker tag ${REPOSITORY_URL}:latest ${REPOSITORY_URL}:${VERSION_TAG}
+          - docker push ${REPOSITORY_URL}:latest
+          - docker push ${REPOSITORY_URL}:${VERSION_TAG}
+          - echo ${REPOSITORY_URL}:${VERSION_TAG}
+          - CLUSTER_NAME="${PROJECT_NAME}-${VERSION_TAG}"
+          - SERVICE_NAME="${PROJECT_NAME}-service"
+          - TASK_DEFINITION_NAME="${PROJECT_NAME}-${VERSION_TAG}"
+          - echo "Registering new container definition..."
+          - NEW_CONTAINER_DEFINTIION=`envsubst < task-definition.json`
+          - RETURNED_TASK_DEF=`aws ecs register-task-definition --region "${AWS_DEFAULT_REGION}" --family "${TASK_DEFINITION_NAME}" --container-definitions "${NEW_CONTAINER_DEFINTIION}"`
+          - ARN=`echo ${RETURNED_TASK_DEF} | jq --raw-output --exit-status '.taskDefinition.taskDefinitionArn'`
+          - echo "Updating the service..."
+          - aws ecs update-service --region "${AWS_DEFAULT_REGION}" --cluster "${CLUSTER_NAME}" --service "${SERVICE_NAME}"  --task-definition "${ARN}"
+          - echo "ses ${AWS_SES_REGION_NAME}, default region ${AWS_DEFAULT_REGION}"
 pipelines:
   branches:
     master:
