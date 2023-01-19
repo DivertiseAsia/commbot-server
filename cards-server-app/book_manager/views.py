@@ -1,6 +1,6 @@
 from django.utils.translation import gettext_lazy as _
 
-from rest_framework import viewsets
+from rest_framework import viewsets, filters
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 
@@ -17,10 +17,12 @@ class BookPagination(PageNumberPagination):
 
 
 class BookViewSetV1(viewsets.ReadOnlyModelViewSet):
-    pagination_class = BookPagination
-    serializer_class = BookSerializer
-    queryset = Book.objects.all()
     permission_classes = (AllowAny, )
+    serializer_class = BookSerializer
+    pagination_class = BookPagination
+    queryset = Book.objects.all()
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["title", "authors__name"]
 
     def list(self, request, *args, **kwargs):
         if str(request.query_params.get("page", "")) == "0":
