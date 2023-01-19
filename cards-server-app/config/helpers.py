@@ -19,6 +19,10 @@ def model_admin_url(obj, name: str = None) -> str:
     return format_html('<a href="{}">{}</a>', url, name or str(obj))
 
 
+def get_all_field_names(model_class):
+    return [field.name for field in model_class._meta.get_fields()]
+
+
 class BaseTestCase(APITestCase):
     def setUp(self):
         self.current_user = None
