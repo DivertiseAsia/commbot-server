@@ -21,9 +21,11 @@ class BookViewSetV1(viewsets.ReadOnlyModelViewSet):
     serializer_class = BookSerializer
     pagination_class = BookPagination
     queryset = Book.objects.all()
-    filter_backends = [filters.SearchFilter]
-    search_fields = ["title", "authors__name"]
 
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    ordering_fields = ["title"]
+    search_fields = ["title", "authors__name"]
+    
     def list(self, request, *args, **kwargs):
         if str(request.query_params.get("page", "")) == "0":
             self.pagination_class = None
