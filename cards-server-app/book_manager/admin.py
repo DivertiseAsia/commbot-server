@@ -19,6 +19,6 @@ class BookAdminView(admin.ModelAdmin):
     search_fields = ("id", "title", "author_names", )
     autocomplete_fields = ["authors"]
 
-f
+
 admin.site.register(Author, AuthorAdminView)
 admin.site.register(Book, BookAdminView)
