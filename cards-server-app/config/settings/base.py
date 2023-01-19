@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "config",
     "user_manager",
     "book_manager",
+    "django_filters",
 ]
 
 MIDDLEWARE = [
