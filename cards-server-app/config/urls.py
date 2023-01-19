@@ -21,7 +21,7 @@ from rest_framework import routers
 
 
 from user_manager.views import AuthViewSetV1, ProfileViewSetV1
-
+from book_manager.views import BookViewSetV1
 
 def trigger_error(request):
     oh_no = 1 / 0
@@ -38,6 +38,7 @@ api_v1 = get_schema_view(
 router_v1 = routers.DefaultRouter()
 router_v1.register(r"auth", AuthViewSetV1, basename="auth")
 router_v1.register(r"profile", ProfileViewSetV1, basename="profile")
+router_v1.register(r"books", BookViewSetV1, basename="books")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
