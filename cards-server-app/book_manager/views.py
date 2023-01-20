@@ -1,11 +1,10 @@
 from django.utils.translation import gettext_lazy as _
 
-from django_filters.rest_framework import DjangoFilterBackend
-
-from rest_framework import viewsets, filters
+from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 
+from config.mixins import PaginationListViewSetMixin
 from .models import Book
 from .serializers import BookSerializer
 
@@ -18,22 +17,15 @@ class BookPagination(PageNumberPagination):
                                'without paginated')
 
 
-class BookViewSetV1(viewsets.ReadOnlyModelViewSet):
+class BookViewSetV1(PaginationListViewSetMixin, viewsets.ReadOnlyModelViewSet):
     permission_classes = (AllowAny, )
     serializer_class = BookSerializer
     pagination_class = BookPagination
     queryset = Book.objects.all()
 
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
     filterset_fields = {
             "title": ["exact", "icontains", ],
             "authors__name": ["exact", "icontains", ],
     }
     ordering_fields = ["title"]
     search_fields = ["title", "authors__name"]
-
-    def list(self, request, *args, **kwargs):
-        if str(request.query_params.get("page", "")) == "0":
-            self.pagination_class = None
-
-        return super().list(request, args, kwargs)
