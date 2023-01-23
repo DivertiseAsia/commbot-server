@@ -22,7 +22,7 @@ class PaginationListViewSetMixin:
     filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
 
     def get_paginator_page_query_param(self):
-        if not self.paginator:
+        if not getattr(self, "paginator", None) or not self.paginator:
             raise NotImplementedError(
                 "{} is missing Rest Framework the Pagination class.".format(
                     self.__class__.__name__
