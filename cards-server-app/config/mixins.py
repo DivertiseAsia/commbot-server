@@ -1,6 +1,16 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from django.utils.translation import gettext_lazy as _
 
 from rest_framework import filters
+from rest_framework.pagination import PageNumberPagination
+
+
+class DefaultPagination(PageNumberPagination):
+    page_size = 100
+    max_page_size = 100
+    page_size_query_param = "page_size"
+    page_query_description = _('A page number within the paginated result set. page "-1" would return a list result '
+                               'without paginated')
 
 
 class PaginationListViewSetMixin:
@@ -16,9 +26,10 @@ class PaginationListViewSetMixin:
             filterset_fields = {
                 <field_name>: Array<queryset_filter_type>,  # (i.e. "exact", "icontains")
             }
-        - serach:
+        - search:
             search_fields = Array<field_name>
     """
+    pagination_class = DefaultPagination
 
     filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
 
