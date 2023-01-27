@@ -51,9 +51,9 @@ class TestBookViews(BaseTestCase):
     def assertTitleOrdering(self, response_json, expected_book):
         self.assertEqual(expected_book.title, response_json["title"])
 
-    def test_get_book_list_with_page_zero_would_return_results_without_pagination(self):
+    def test_get_book_list_with_page_negative_one_would_return_results_without_pagination(self):
         self.given_url(self.get_url_reverse("list"))
-        self.given_page_query_param(0)
+        self.given_page_query_param(-1)
 
         self.when_user_gets_json()
 
@@ -63,7 +63,7 @@ class TestBookViews(BaseTestCase):
         self.assertNotIn("previous", self.response_json)
         self.assertNotIn("results", self.response_json)
         self.assertResponseResultKeys(self.response_json[0])
-        print(">> test_get_book_list_with_page_zero_would_return_results_without_pagination: OK <<")
+        print(">> test_get_book_list_with_page_negative_one_would_return_results_without_pagination: OK <<")
 
     def test_get_book_list_without_page_query_param(self):
         self.given_url(self.get_url_reverse("list"))
@@ -85,6 +85,15 @@ class TestBookViews(BaseTestCase):
         self.assertResponsePagination()
         self.assertResponseResultKeys(self.response_json["results"][0])
         print(">> test_get_book_list_with_valid_page: OK <<")
+
+    def test_get_book_list_with_invalid_page_0(self):
+        self.given_url(self.get_url_reverse("list"))
+        self.given_page_query_param(0)
+
+        self.when_user_gets_json()
+
+        self.assertResponseNotFound()
+        print(">> test_get_book_list_with_invalid_page_0: OK <<")
 
     def test_get_book_list_with_invalid_page(self):
         self.given_url(self.get_url_reverse("list"))

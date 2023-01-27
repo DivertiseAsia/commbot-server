@@ -8,7 +8,8 @@ class PaginationListViewSetMixin:
     Pagination List ViewSet Mixin
     ---
     - Using Rest Framework Pagination Class
-        If page is 0 it would return results list without Pagination
+        - The page number start at 1
+        - If page is -1 it would return results list without Pagination
     - Supports search, and django-filter filter backends
         These fields are required to enable filter backend
         - django-filter:
@@ -36,8 +37,8 @@ class PaginationListViewSetMixin:
         return str(request.query_params.get(page_key, ""))
 
     def list(self, request, *args, **kwargs):
-        """Remove pagination_class and _paginator if request page is 0"""
-        if self.get_page_number_in_query_param(request) == "0":
+        # Remove pagination_class and _paginator if request page is -1
+        if self.get_page_number_in_query_param(request) == "-1":
             self.pagination_class = None
             self._paginator = None
 
