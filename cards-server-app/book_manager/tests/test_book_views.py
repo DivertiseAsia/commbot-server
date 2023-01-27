@@ -129,7 +129,8 @@ class TestBookViews(BaseTestCase):
 
     def test_get_book_list_ordering_title_asc_with_page_1(self):
         self.given_url(self.get_url_reverse("list"))
-        self.given_page_query_param({"ordering": "title"})
+        self.given_page_query_param(1)
+        self.query_params.update({"ordering": "title"})
 
         self.when_user_gets_json()
 
@@ -144,7 +145,8 @@ class TestBookViews(BaseTestCase):
 
     def test_get_book_list_ordering_title_desc_with_page_1(self):
         self.given_url(self.get_url_reverse("list"))
-        self.given_page_query_param({"ordering": "-title"})
+        self.given_page_query_param(1)
+        self.query_params.update({"ordering": "-title"})
 
         self.when_user_gets_json()
 
@@ -155,5 +157,4 @@ class TestBookViews(BaseTestCase):
         self.assertTitleOrdering(response_results[0], self.book_rapunzel)
         self.assertTitleOrdering(response_results[1], self.book_rabbit_and_turtle)
         self.assertTitleOrdering(response_results[2], self.book_cinderella)
-
         print(">> test_get_book_list_ordering_title_desc_with_page_1: OK <<")
