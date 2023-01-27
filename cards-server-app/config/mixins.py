@@ -20,6 +20,7 @@ class PaginationListViewSetMixin:
     - Using Rest Framework Pagination Class
         - The page number start at 1
         - If page is -1 it would return results list without Pagination
+        - Supports override `page_size` with `OVERRIDE_PAGE_SIZE`
     - Supports search, and django-filter filter backends
         These fields are required to enable filter backend
         - django-filter:
@@ -31,7 +32,25 @@ class PaginationListViewSetMixin:
     """
     pagination_class = DefaultPagination
 
+    # Override pagination settings
+    OVERRIDE_PAGE_SIZE = None
+
     filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
+
+    @property
+    def paginator(self):
+        """
+        Override rest framework GenericAPIView paginator property
+        ---
+            The paginator instance associated with the view, or `None`
+            and override pagination settings if it's not `None`.
+        """
+        _ = super().paginator
+
+        if self._paginator and self.OVERRIDE_PAGE_SIZE is not None:
+            self._paginator.page_size = self.OVERRIDE_PAGE_SIZE
+
+        return self._paginator
 
     def get_paginator_page_query_param(self):
         if not getattr(self, "paginator", None) or not self.paginator:
