@@ -30,8 +30,8 @@ class TestBookViews(BaseTestCase):
         return Author.objects.create(**details)
 
     @staticmethod
-    def get_url_reverse(view_path, version=1):
-        return reverse(f"v{version}:books-{view_path}")
+    def get_url_reverse(view_path):
+        return reverse(f"demo:books-{view_path}")
 
     def given_page_query_param(self, page):
         self.given_query_params({"page": page})
@@ -65,7 +65,7 @@ class TestBookViews(BaseTestCase):
         self.assertResponseResultKeys(self.response_json[0])
         print(">> test_get_book_list_with_page_negative_one_would_return_results_without_pagination: OK <<")
 
-    def test_get_book_list_without_page_query_param(self):
+    def test_get_book_list_without_page_query_param_return_book_first_page(self):
         self.given_url(self.get_url_reverse("list"))
 
         self.when_user_gets_json()
@@ -75,7 +75,7 @@ class TestBookViews(BaseTestCase):
         self.assertResponseResultKeys(self.response_json["results"][0])
         print(">> test_get_book_list_without_page_query_param: OK <<")
 
-    def test_get_book_list_with_valid_page(self):
+    def test_get_book_list_with_valid_page_return_book_with_pagination(self):
         self.given_url(self.get_url_reverse("list"))
         self.given_page_query_param(1)
 
@@ -86,7 +86,7 @@ class TestBookViews(BaseTestCase):
         self.assertResponseResultKeys(self.response_json["results"][0])
         print(">> test_get_book_list_with_valid_page: OK <<")
 
-    def test_get_book_list_with_invalid_page_0(self):
+    def test_get_book_list_with_invalid_page_0_return_not_found_invalid_page(self):
         self.given_url(self.get_url_reverse("list"))
         self.given_page_query_param(0)
 
@@ -95,7 +95,7 @@ class TestBookViews(BaseTestCase):
         self.assertResponseNotFound()
         print(">> test_get_book_list_with_invalid_page_0: OK <<")
 
-    def test_get_book_list_with_invalid_page(self):
+    def test_get_book_list_with_invalid_page_return_not_found_invalid_page(self):
         self.given_url(self.get_url_reverse("list"))
         self.given_page_query_param(10000)
 
@@ -105,7 +105,7 @@ class TestBookViews(BaseTestCase):
         self.assertEqual(self.response_json["detail"], "Invalid page.")
         print(">> test_get_book_list_with_invalid_page: OK <<")
 
-    def test_get_book_list_of_bros_grimm_with_page_1(self):
+    def test_get_book_list_of_bros_grimm_with_page_1_return_book_with_pagination(self):
         self.given_url(self.get_url_reverse("list"))
         self.given_page_query_param(1)
         self.query_params.update({"authors__name__icontains": "grimm"})
@@ -120,7 +120,7 @@ class TestBookViews(BaseTestCase):
             self.assertIn(self.author_brothers_grimm.name, result["authors"])
         print(">> test_get_book_list_of_bros_grimm_with_page_1: OK <<")
 
-    def test_get_book_list_of_title_ra_with_page_1(self):
+    def test_get_book_list_of_title_ra_with_page_1_return_book_with_pagination(self):
         self.given_url(self.get_url_reverse("list"))
         self.given_page_query_param(1)
         self.query_params.update({"title__icontains": "Ra"})
@@ -136,7 +136,7 @@ class TestBookViews(BaseTestCase):
         self.assertNotIn(self.book_cinderella.title, response_titles)
         print(">> test_get_book_list_of_title_ra_with_page_1: OK <<")
 
-    def test_get_book_list_ordering_title_asc_with_page_1(self):
+    def test_get_book_list_ordering_title_asc_with_page_1_return_book_with_pagination(self):
         self.given_url(self.get_url_reverse("list"))
         self.given_page_query_param(1)
         self.query_params.update({"ordering": "title"})
@@ -152,7 +152,7 @@ class TestBookViews(BaseTestCase):
         self.assertTitleOrdering(response_results[2], self.book_rapunzel)
         print(">> test_get_book_list_ordering_asc_with_page_1: OK <<")
 
-    def test_get_book_list_ordering_title_desc_with_page_1(self):
+    def test_get_book_list_ordering_title_desc_with_page_1_return_book_with_paginationf(self):
         self.given_url(self.get_url_reverse("list"))
         self.given_page_query_param(1)
         self.query_params.update({"ordering": "-title"})
