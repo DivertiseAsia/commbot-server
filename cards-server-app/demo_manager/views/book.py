@@ -3,8 +3,8 @@ from rest_framework.permissions import AllowAny
 
 from config.mixins import PaginationListViewSetMixin
 
-from .models import Book
-from .serializers import BookSerializer
+from ..models import Book
+from ..serializers import BookSerializer
 
 
 class BookViewSetV1(PaginationListViewSetMixin, viewsets.ReadOnlyModelViewSet):

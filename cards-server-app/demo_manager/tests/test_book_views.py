@@ -5,7 +5,7 @@
 from rest_framework.reverse import reverse
 
 from config.helpers import BaseTestCase
-from ..models import Author, Book
+from demo_manager.models import Author, Book
 
 
 class TestBookViews(BaseTestCase):

@@ -21,7 +21,7 @@ from rest_framework import routers
 
 
 from user_manager.views import AuthViewSetV1, ProfileViewSetV1
-from book_manager.views import BookViewSetV1
+from demo_manager.views import BookViewSetV1
 
 def trigger_error(request):
     oh_no = 1 / 0

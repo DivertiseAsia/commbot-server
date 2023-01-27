@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from config.helpers import get_all_field_names
 
-from .models import Author, Book
+from ..models import Author, Book
 
 
 class AuthorAdminView(admin.ModelAdmin):
