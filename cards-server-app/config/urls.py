@@ -19,8 +19,7 @@ from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import routers
 
-
-from demo_manager.views import BookViewSetV1
+from demo_manager.urls import urlpatterns as demo_manager_urls
 from user_manager.views import AuthViewSetV1, ProfileViewSetV1
 
 
@@ -39,10 +38,6 @@ api_v1 = get_schema_view(
 router_v1 = routers.DefaultRouter()
 router_v1.register(r"auth", AuthViewSetV1, basename="auth")
 router_v1.register(r"profile", ProfileViewSetV1, basename="profile")
-
-
-router_demo = routers.DefaultRouter()
-router_demo.register(r"books", BookViewSetV1, basename="books")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -63,7 +58,6 @@ urlpatterns = [
         "api/v1/auth/reset/",
         include("django_rest_passwordreset.urls", namespace="password_reset"),
     ),
-    path("api/v1/demo/", include((router_demo.urls, "demo-api"), namespace="demo")),  # for demo_manager can remove
     path("trigger_error/", trigger_error),
     path("ht/", include("health_check.urls")),
-]
+] + demo_manager_urls  # for demo_manager can remove
