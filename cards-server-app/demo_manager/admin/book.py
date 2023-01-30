@@ -20,5 +20,3 @@ class BookAdminView(admin.ModelAdmin):
     autocomplete_fields = ["authors"]
 
 
-admin.site.register(Author, AuthorAdminView)
-admin.site.register(Book, BookAdminView)
