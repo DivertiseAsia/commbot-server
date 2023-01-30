@@ -13,13 +13,12 @@ class TestProfileViews(BaseTestCase):
         self.first_name = "Theo"
         self.last_name = "Burns"
 
-    def test_get_profile_for_logged_out_user_is_forbidden(self):
+    def test_get_profile_for_logged_out_user_is_not_authorized(self):
         self.given_url(reverse("v1:profile-me"))
 
         self.when_user_gets_json()
-
-        self.assertResponseForbidden()
-        print(">> test_get_profile_for_user_with_profile_returns_profile: OK <<")
+        self.assertResponseNotAuthorized()
+        print(">> test_get_profile_for_logged_out_user_is_not_authorized: OK <<")
 
     def test_get_profile_for_logged_in_user_with_profile_returns_profile(self):
         user = self.given_a_new_user(email=self.user_email)
