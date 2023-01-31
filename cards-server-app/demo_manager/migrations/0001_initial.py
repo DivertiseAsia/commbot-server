@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
             name='Book',
             fields=[
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False, verbose_name='ID')),
-                ('isbn', models.CharField(max_length=255, unique=True, verbose_name='ISBN: The International Standard Book Number')),
+                ('isbn', models.CharField(max_length=255, blank=True, verbose_name='ISBN: The International Standard Book Number')),
                 ('title', models.CharField(max_length=255, verbose_name='Title')),
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created At')),
                 ('authors', models.ManyToManyField(related_name='books', to='demo_manager.author')),
