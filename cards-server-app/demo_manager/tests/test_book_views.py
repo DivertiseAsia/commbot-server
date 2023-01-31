@@ -11,9 +11,9 @@ from demo_manager.models import Author, Book
 class TestBookViews(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.book_rabbit_and_turtle = self.create_object({"title": "Rabbit and Turtle"})
-        self.book_rapunzel = self.create_object({"title": "Rapunzel"})
-        self.book_cinderella = self.create_object({"title": "Cinderella"})
+        self.book_rabbit_and_turtle = self.create_object({"title": "Rabbit and Turtle", "isbn": "000000000001"})
+        self.book_rapunzel = self.create_object({"title": "Rapunzel", "isbn": "000000000002"})
+        self.book_cinderella = self.create_object({"title": "Cinderella", "isbn": "000000000003"})
 
         self.author_aesop = self.create_author({"name": "Aesop"})
         self.author_brothers_grimm = self.create_author({"name": "Brothers Grimm"})
@@ -44,6 +44,7 @@ class TestBookViews(BaseTestCase):
 
     def assertResponseResultKeys(self, result_json):
         self.assertIn("id", result_json)
+        self.assertIn("isbn", result_json)
         self.assertIn("title", result_json)
         self.assertIn("authors", result_json)
         self.assertIn("created_at", result_json)
