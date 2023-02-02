@@ -27,12 +27,8 @@ class Book(models.Model):
         verbose_name_plural = _("books")
         ordering = ["title"]
 
-    @property
-    def author_names(self):
-        return ", ".join(list(self.authors.all().values_list('name', flat=True)))
-
     def __str__(self):
-        return f"{self.title} - {self.author_names}"
+        return self.title
 
 
 class BookWithIndex(models.Model):

@@ -19,4 +19,7 @@ class BookAdminView(admin.ModelAdmin):
     search_fields = ("id", "title", "author_names", )
     autocomplete_fields = ["authors"]
 
+    def author_names(self, book):
+        return ", ".join(list(book.authors.values_list('name', flat=True)))
+
 
