@@ -60,4 +60,6 @@ urlpatterns = [
     ),
     path("trigger_error/", trigger_error),
     path("ht/", include("health_check.urls")),
+    path('__debug__/', include('debug_toolbar.urls')),
+
 ] + demo_manager_urls  # for demo_manager can remove
