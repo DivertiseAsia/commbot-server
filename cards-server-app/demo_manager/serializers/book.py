@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from ..models import Book
+from ..models import Book, BookWithIndex
 
 
 class BookSerializer(serializers.ModelSerializer):
@@ -8,4 +8,10 @@ class BookSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Book
+        fields = ("id", "isbn", "title", "authors", "created_at")
+
+
+class BookWithIndexSerializer(BookSerializer):
+    class Meta:
+        model = BookWithIndex
         fields = ("id", "isbn", "title", "authors", "created_at")

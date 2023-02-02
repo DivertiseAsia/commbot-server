@@ -1,1 +1,1 @@
-from .book import BookSerializer
+from .book import BookSerializer, BookWithIndexSerializer

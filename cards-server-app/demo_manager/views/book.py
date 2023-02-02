@@ -3,8 +3,8 @@ from rest_framework.permissions import AllowAny
 
 from config.mixins import PaginationListViewSetMixin
 
-from ..models import Book
-from ..serializers import BookSerializer
+from ..models import Book, BookWithIndex
+from ..serializers import BookSerializer, BookWithIndexSerializer
 
 
 class BookViewSetV1(PaginationListViewSetMixin, viewsets.ReadOnlyModelViewSet):
@@ -20,3 +20,9 @@ class BookViewSetV1(PaginationListViewSetMixin, viewsets.ReadOnlyModelViewSet):
     }
     ordering_fields = ["title"]
     search_fields = ["title", "authors__name"]
+
+
+class BookWithIndexViewSetV1(BookViewSetV1):
+    serializer_class = BookWithIndexSerializer
+    queryset = BookWithIndex.objects.all()
+

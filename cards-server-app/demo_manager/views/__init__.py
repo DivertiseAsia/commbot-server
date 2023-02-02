@@ -1,1 +1,1 @@
-from .book import BookViewSetV1
+from .book import BookViewSetV1, BookWithIndexViewSetV1
