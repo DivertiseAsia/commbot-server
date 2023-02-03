@@ -1,8 +1,25 @@
-from django_filters.rest_framework import DjangoFilterBackend
 from django.utils.translation import gettext_lazy as _
-
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from rest_framework.pagination import PageNumberPagination
+
+
+class EagerLoadingViewSetMixin:
+    """
+        Eager Loading ViewSet Mixin
+        ---
+        - Override `get_queryset` of Rest Framework View Set class
+            - call `serializer.setup_eager_loading` to pre-fecth and select related if do exists
+    """
+
+    def get_queryset(self):
+        serializer = self.get_serializer_class()
+        if hasattr(serializer, "setup_eager_loading"):
+            _queryset = self.queryset
+            _queryset = serializer.setup_eager_loading(_queryset)
+            return _queryset
+
+        return super().get_queryset()
 
 
 class DefaultPagination(PageNumberPagination):
@@ -73,3 +90,9 @@ class PaginationListViewSetMixin:
             self._paginator = None
 
         return super().list(request, args, kwargs)
+
+
+class PaginationWithEagerLoadingViewSetMixin(EagerLoadingViewSetMixin, PaginationListViewSetMixin):
+    """
+    Pagination with Eager Loading ViewSet Mixin
+    """

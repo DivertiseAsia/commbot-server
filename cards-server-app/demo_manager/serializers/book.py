@@ -10,6 +10,13 @@ class BookSerializer(serializers.ModelSerializer):
         model = Book
         fields = ("id", "isbn", "title", "authors", "created_at")
 
+    @staticmethod
+    def setup_eager_loading(queryset):
+        """ Perform necessary eager loading of data. """
+        # prefetch_related for "to-many" relationships
+        queryset = queryset.prefetch_related('authors')
+        return queryset
+
 
 class BookWithIndexSerializer(BookSerializer):
     class Meta:

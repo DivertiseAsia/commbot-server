@@ -1,13 +1,13 @@
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny
 
-from config.mixins import PaginationListViewSetMixin
+from config.mixins import PaginationWithEagerLoadingViewSetMixin
 
 from ..models import Book, BookWithIndex
 from ..serializers import BookSerializer, BookWithIndexSerializer
 
 
-class BookViewSetV1(PaginationListViewSetMixin, viewsets.ReadOnlyModelViewSet):
+class BookViewSetV1(PaginationWithEagerLoadingViewSetMixin, viewsets.ReadOnlyModelViewSet):
     permission_classes = (AllowAny,)
     serializer_class = BookSerializer
     queryset = Book.objects.all()
@@ -24,5 +24,5 @@ class BookViewSetV1(PaginationListViewSetMixin, viewsets.ReadOnlyModelViewSet):
 
 class BookWithIndexViewSetV1(BookViewSetV1):
     serializer_class = BookWithIndexSerializer
-    queryset = BookWithIndex.objects.all()
+    queryset = BookWithIndex.objects.prefetch_related("authors")
 
