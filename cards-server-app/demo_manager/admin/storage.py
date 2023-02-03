@@ -5,3 +5,5 @@ from ..models import UserBookStorage
 
 class UserBookStorageAdminView(ImportExportModelAdmin):
     model = UserBookStorage
+    autocomplete_fields = ("books",)
+

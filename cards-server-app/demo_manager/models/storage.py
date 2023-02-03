@@ -11,3 +11,6 @@ User = get_user_model()
 class UserBookStorage(models.Model):
     owner = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name="book_storage")
     books = models.ManyToManyField(BookWithIndex, blank=True)
+
+    def __str__(self):
+        return self.owner.email

@@ -21,8 +21,8 @@ class Migration(migrations.Migration):
                 ('authors', models.ManyToManyField(related_name='books_w_index', to='demo_manager.author')),
             ],
             options={
-                'verbose_name': 'book_with_index',
-                'verbose_name_plural': 'books_with_index',
+                'verbose_name': 'book with index',
+                'verbose_name_plural': 'books with index',
                 'ordering': ['title'],
             },
         ),
