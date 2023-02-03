@@ -4,7 +4,7 @@ from config.helpers import get_all_field_names
 from import_export.admin import ImportExportModelAdmin
 
 
-from ..models import Author, Book
+from ..models import Author, Book, BookWithIndex
 
 
 class AuthorAdminView(ImportExportModelAdmin):
@@ -30,3 +30,8 @@ class BookAdminView(ImportExportModelAdmin):
 
     def author_names(self, book):
         return book.author_names
+
+
+class BookWithIndexAdminView(BookAdminView):
+    model = BookWithIndex
+    fields = get_all_field_names(BookWithIndex)
