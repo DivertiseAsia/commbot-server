@@ -39,8 +39,8 @@ class BookWithIndex(models.Model):
     created_at = models.DateTimeField(_("Created At"), auto_now_add=True)
 
     class Meta:
-        verbose_name = _("book_with_index")
-        verbose_name_plural = _("books_with_index")
+        verbose_name = _("book with index")
+        verbose_name_plural = _("books with index")
         ordering = ["title"]
 
     def __str__(self):
