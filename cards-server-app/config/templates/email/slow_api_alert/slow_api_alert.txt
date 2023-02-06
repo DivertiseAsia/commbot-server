@@ -7,3 +7,4 @@ This api took {{ request_duration_ms }} ms to response. the response time is gre
       ---
       Response At: {{ response.at }}
       Response Status Code: {{ response.status_code }}
+This email was sent from {{ sent_from }}

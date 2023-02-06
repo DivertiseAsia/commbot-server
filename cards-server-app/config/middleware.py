@@ -54,6 +54,7 @@ class SlowAPIAlertMiddleware:
                 "at": f"{response_at}",
                 "status_code": response.status_code,
             },
+            "sent_from": request.get_host()
         }
         recipient_list = User.objects.filter(is_superuser=True).values_list("email", flat=True)
 
