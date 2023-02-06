@@ -1,3 +1,4 @@
+from django.contrib.admin.views.main import ChangeList
 from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
@@ -103,3 +104,25 @@ class PaginationWithEagerLoadingViewSetMixin(EagerLoadingViewSetMixin, Paginatio
     """
     Pagination with Eager Loading ViewSet Mixin
     """
+
+
+# Admin
+class EagerLoadingAdminChangeListMixin(ChangeList):
+    """
+    EagerLoadingAdminChangeListMixin
+    ---
+    Annotates model queryset to display in list_display without several hit database
+    examples:
+        BookChangeList: demo_manager/admin/book.py
+    """
+    def annotates_queryset(self, queryset):
+        raise NotImplementedError(
+            "{} is missing function annotates_queryset.".format(
+                self.__class__.__name__
+            )
+        )
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        queryset = self.annotates_queryset(queryset)
+        return queryset
