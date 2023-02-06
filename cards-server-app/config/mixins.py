@@ -9,7 +9,11 @@ class EagerLoadingViewSetMixin:
         Eager Loading ViewSet Mixin
         ---
         - Override `get_queryset` of Rest Framework View Set class
-            - call `serializer.setup_eager_loading` to pre-fecth and select related if do exists
+            - call `serializer.setup_eager_loading` to pre-fecth and select related
+            - required function `serializer.setup_eager_loading`
+        - examples:
+            - BookViewSetV1: demo_manager/views/book.py
+                - BookSerializer:  demo_manager/serializers/book.py
     """
 
     def get_queryset(self):
