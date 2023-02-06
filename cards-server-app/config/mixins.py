@@ -14,12 +14,15 @@ class EagerLoadingViewSetMixin:
 
     def get_queryset(self):
         serializer = self.get_serializer_class()
-        if hasattr(serializer, "setup_eager_loading"):
-            _queryset = self.queryset
-            _queryset = serializer.setup_eager_loading(_queryset)
-            return _queryset
-
-        return super().get_queryset()
+        if not hasattr(serializer, "setup_eager_loading"):
+            raise NotImplementedError(
+                "{} is missing function setup_eager_loading.".format(
+                    serializer.__name__
+                )
+            )
+        _queryset = self.queryset
+        _queryset = serializer.setup_eager_loading(_queryset)
+        return _queryset
 
 
 class DefaultPagination(PageNumberPagination):
