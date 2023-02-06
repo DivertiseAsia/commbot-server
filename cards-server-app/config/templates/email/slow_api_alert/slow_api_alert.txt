@@ -1,0 +1,9 @@
+[Alert] Slow API detected
+This api took {{ request_duration_ms }} ms to response. the response time is greater or equal {{ alert_at_ms }} ms
+    
+      Request At: {{ request.at }}
+      Request METHOD: {{ request.method }}
+      Request URL: {{ request.url }}
+      ---
+      Response At: {{ response.at }}
+      Response Status Code: {{ response.status_code }}

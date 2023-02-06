@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+  <style>
+      html {
+          font-size: 16px;
+          color: #404040;
+          font-weight: 300;
+      }
+
+      html, body {
+          height: 100%;
+          margin: 0;
+          background: #f0f0f10a;
+          text-align: center;
+      }
+      .request-details {
+          text-align: start;
+          margin: 1.5rem;
+      }
+  </style>
+</head>
+<body>
+<div class="">
+  <h1>[Alert] Slow API detected</h1>
+  <div class="request-details">
+    This api took {{ request_duration_ms }} ms to response. the response time is greater or equal {{ alert_at_ms }} ms
+    <ul>
+      <li>Request At: {{ request.at }}</li>
+      <li>Request METHOD: {{ request.method }}</li>
+      <li>Request URL: {{ request.url }}</li>
+    </ul>
+    <ul>
+      <li>Response At: {{ response.at }}</li>
+      <li>Response Status Code: {{ response.status_code }}</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>
