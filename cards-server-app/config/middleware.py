@@ -40,7 +40,7 @@ class SlowAPIAlertMiddleware:
         # Code to be executed for each request before
         # the view (and later middleware) are called.
         print(f">>> MIDDLEWARE req: {request}")
-        if not self.is_validate():
+        if not self.is_validate() or not self.is_api_alert_request(request):
             return self.get_response(request)
 
         req_time = timezone.now()
