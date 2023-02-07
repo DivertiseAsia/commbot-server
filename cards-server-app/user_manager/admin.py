@@ -7,6 +7,7 @@ from django.urls import path
 from import_export.admin import ImportMixin, ImportExportModelAdmin
 from import_export import resources
 
+from config.mixins import EagerLoadingAdminChangeListMixin
 from user_manager.forms import (
     UserAdminCreationForm,
     UserAdminChangeForm,
@@ -67,6 +68,11 @@ class UserAdminView(ImportMixin, BaseUserAdmin):
         )
 
 
+class ProfileChangeList(EagerLoadingAdminChangeListMixin):
+    def setup_eager_loading(self, queryset):
+        return queryset.select_related("user")
+
+
 class ProfileResource(resources.ModelResource):
     class Meta:
         model = Profile
@@ -81,6 +87,9 @@ class ProfileAdminView(ImportExportModelAdmin):
     autocomplete_fields = ["user"]
 
     resource_classes = [ProfileResource]
+
+    def get_changelist(self, request, **kwargs):
+        return ProfileChangeList
 
     def user_link(self, obj):
         return model_admin_url(obj.user)

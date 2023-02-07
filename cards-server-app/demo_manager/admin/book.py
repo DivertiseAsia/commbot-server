@@ -4,7 +4,7 @@ from django.contrib.postgres.aggregates import StringAgg
 from config.helpers import get_all_field_names
 from import_export.admin import ImportExportModelAdmin
 
-from config.mixins import EagerLoadingAdminChangeListMixin
+from config.mixins import EagerLoadingAnnotatesAdminChangeListMixin
 
 from ..models import Author, Book, BookWithIndex
 
@@ -15,7 +15,7 @@ class AuthorAdminView(ImportExportModelAdmin):
     search_fields = ("name", )
 
 
-class BookChangeList(EagerLoadingAdminChangeListMixin):
+class BookChangeList(EagerLoadingAnnotatesAdminChangeListMixin):
     """
     BookChangeList
     ---

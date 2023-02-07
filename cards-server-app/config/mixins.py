@@ -107,12 +107,21 @@ class PaginationWithEagerLoadingViewSetMixin(EagerLoadingViewSetMixin, Paginatio
 
 
 # Admin
-class EagerLoadingAdminChangeListMixin(ChangeList):
+class EagerLoadingAnnotatesAdminChangeListMixin(ChangeList):
     """
-    EagerLoadingAdminChangeListMixin
+    EagerLoadingAnnotatesAdminChangeListMixin
     ---
-    Annotates model queryset to display in list_display without several hit database
+    Annotates model queryset to display ManyToMany related in list_display without several hit database
+    ---
+    Instruction
+    1. Create new EagerLoadingAnnotatesChangeList class
+    2. Implement function annotates_queryset
+    3. Override AdminView function get_changelist
+        def get_changelist(self, request, **kwargs):
+            return EagerLoadingAnnotatesChangeList
+    ---
     examples:
+        BookAdminView: demo_manager/admin/book.py
         BookChangeList: demo_manager/admin/book.py
     """
     def annotates_queryset(self, queryset):
@@ -125,4 +134,34 @@ class EagerLoadingAdminChangeListMixin(ChangeList):
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
         queryset = self.annotates_queryset(queryset)
+        return queryset
+
+
+class EagerLoadingAdminChangeListMixin(ChangeList):
+    """
+    EagerLoadingAdminChangeListMixin
+    ---
+    Catching model queryset to display OneToOne, ManyToOne related in list_display without several hit database
+    ---
+    Instruction
+    1. Create new EagerLoadingAdminChangeList class
+    2. Implement function setup_eager_loading
+    3. Override AdminView function get_changelist
+        def get_changelist(self, request, **kwargs):
+            return EagerLoadingAdminChangeList
+    ---
+    examples:
+        ProfileAdminView: user_manager/admin.py
+        ProfileChangeList: user_manager/admin.py
+    """
+    def setup_eager_loading(self, queryset):
+        raise NotImplementedError(
+            "{} is missing function setup_eager_loading.".format(
+                self.__class__.__name__
+            )
+        )
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        queryset = self.setup_eager_loading(queryset)
         return queryset
