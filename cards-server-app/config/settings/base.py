@@ -142,7 +142,7 @@ USE_TZ = True
 LOGIN_URL = "rest_framework:login"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_URL = "rest_framework:logout"
-LOGOUT_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/admin"
 
 
 # Static files (CSS, JavaScript, Images)
