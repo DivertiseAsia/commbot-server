@@ -1,7 +1,5 @@
 from django.conf import settings
-from django.core import mail
 from django.dispatch import Signal
-from django.template.loader import render_to_string
 from django.urls import resolve
 from django.urls.exceptions import Resolver404
 from django.utils import timezone
@@ -59,6 +57,9 @@ class SlowAPIAlertMiddleware:
             },
             "sent_from": request.get_host()
         }
+
+        # send a signal that slow api alert has triggered
+        # let whoever receives this signal handle alert method
         slow_api_alert_triggered.send(sender=self.__class__, alert_data=alert_data)
 
     def __call__(self, request):
@@ -79,4 +80,3 @@ class SlowAPIAlertMiddleware:
             self.trigger_alert(request, response, request_duration_ms, request_at=req_time, response_at=resp_time)
 
         return response
-
