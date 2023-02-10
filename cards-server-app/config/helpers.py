@@ -1,10 +1,11 @@
-from rest_framework.test import APITestCase
-from rest_framework import status
-from django.utils.http import urlencode
-from django.shortcuts import resolve_url
-from django.utils.safestring import SafeText
+from django.conf import settings
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
+from django.shortcuts import resolve_url
 from django.utils.html import format_html
+from django.utils.http import urlencode
+from django.utils.safestring import SafeText
+from rest_framework import status
+from rest_framework.test import APITestCase
 
 from user_manager.models import User, Profile
 
@@ -21,6 +22,10 @@ def model_admin_url(obj, name: str = None) -> str:
 
 def get_all_field_names(model_class):
     return [field.name for field in model_class._meta.get_fields()]
+
+
+def get_no_reply_email():
+    return getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@divertise.asia")
 
 
 class BaseTestCase(APITestCase):

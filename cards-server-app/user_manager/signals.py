@@ -1,13 +1,13 @@
+from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.dispatch import receiver
 from django.template.loader import render_to_string
-from django.urls import reverse
-from django.conf import settings
-
 from django_rest_passwordreset.signals import reset_password_token_created
 
+from config.helpers import get_no_reply_email
+
 FRONTEND_URL = getattr(settings, "FRONTEND_URL", "")
-DEFAULT_FROM_EMAIL = getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@divertise.asia")
+DEFAULT_FROM_EMAIL = get_no_reply_email()
 
 
 @receiver(reset_password_token_created)
