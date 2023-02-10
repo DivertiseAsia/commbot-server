@@ -107,52 +107,22 @@ class PaginationWithEagerLoadingViewSetMixin(EagerLoadingViewSetMixin, Paginatio
 
 
 # Admin
-class EagerLoadingAnnotatesAdminChangeListMixin(ChangeList):
-    """
-    EagerLoadingAnnotatesAdminChangeListMixin
-    ---
-    Annotates model queryset to display ManyToMany related in list_display without several hit database
-    ---
-    Instruction
-    1. Create new EagerLoadingAnnotatesChangeList class
-    2. Implement function annotates_queryset
-    3. Override AdminView function get_changelist
-        def get_changelist(self, request, **kwargs):
-            return EagerLoadingAnnotatesChangeList
-    ---
-    examples:
-        BookAdminView: demo_manager/admin/book.py
-        BookChangeList: demo_manager/admin/book.py
-    """
-    def annotates_queryset(self, queryset):
-        raise NotImplementedError(
-            "{} is missing function annotates_queryset.".format(
-                self.__class__.__name__
-            )
-        )
-
-    def get_queryset(self, request):
-        queryset = super().get_queryset(request)
-        queryset = self.annotates_queryset(queryset)
+class EagerLoadingChangeList(ChangeList):
+    def get_queryset(self, changelist_request):
+        queryset = super().get_queryset(changelist_request)
+        queryset = self.model_admin.setup_eager_loading(queryset)
         return queryset
 
 
-class EagerLoadingAdminChangeListMixin(ChangeList):
+class EagerLoadingAdminChangeListMixin:
     """
     EagerLoadingAdminChangeListMixin
     ---
-    Catching model queryset to display OneToOne, ManyToOne related in list_display without several hit database
-    ---
-    Instruction
-    1. Create new EagerLoadingAdminChangeList class
-    2. Implement function setup_eager_loading
-    3. Override AdminView function get_changelist
-        def get_changelist(self, request, **kwargs):
-            return EagerLoadingAdminChangeList
+    Catching model queryset to display OneToOne, ManyToOne, ManyToMany related in list_display without several hit database
     ---
     examples:
+        BookAdminView: demo_manager/admin/book.py
         ProfileAdminView: user_manager/admin.py
-        ProfileChangeList: user_manager/admin.py
     """
     def setup_eager_loading(self, queryset):
         raise NotImplementedError(
@@ -161,7 +131,5 @@ class EagerLoadingAdminChangeListMixin(ChangeList):
             )
         )
 
-    def get_queryset(self, request):
-        queryset = super().get_queryset(request)
-        queryset = self.setup_eager_loading(queryset)
-        return queryset
+    def get_changelist(self, request, **kwargs):
+        return EagerLoadingChangeList

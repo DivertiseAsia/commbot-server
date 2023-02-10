@@ -68,18 +68,13 @@ class UserAdminView(ImportMixin, BaseUserAdmin):
         )
 
 
-class ProfileChangeList(EagerLoadingAdminChangeListMixin):
-    def setup_eager_loading(self, queryset):
-        return queryset.select_related("user")
-
-
 class ProfileResource(resources.ModelResource):
     class Meta:
         model = Profile
         use_natural_foreign_keys = True
 
 
-class ProfileAdminView(ImportExportModelAdmin):
+class ProfileAdminView(EagerLoadingAdminChangeListMixin, ImportExportModelAdmin):
     model = Profile
     list_display = ("__str__", "user_link", "first_name", "last_name")
 
@@ -88,8 +83,8 @@ class ProfileAdminView(ImportExportModelAdmin):
 
     resource_classes = [ProfileResource]
 
-    def get_changelist(self, request, **kwargs):
-        return ProfileChangeList
+    def setup_eager_loading(self, queryset):
+        return queryset.select_related("user")
 
     def user_link(self, obj):
         return model_admin_url(obj.user)
