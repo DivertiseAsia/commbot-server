@@ -1,9 +1,15 @@
 from django.conf import settings
 from django.core import mail
+from django.dispatch import Signal
 from django.template.loader import render_to_string
 from django.urls import resolve
 from django.urls.exceptions import Resolver404
 from django.utils import timezone
+
+"""
+Signal arguments: alert_data
+"""
+slow_api_alert_triggered = Signal()
 
 
 class SlowAPIAlertMiddleware:
@@ -38,11 +44,8 @@ class SlowAPIAlertMiddleware:
 
         return resolver_match.namespaces and resolver_match.namespaces[-1] in self.alert_namespaces
 
-    def send_mail_to_staff(self, request, response, request_duration_ms, request_at, response_at):
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-
-        context = {
+    def trigger_alert(self, request, response, request_duration_ms, request_at, response_at):
+        alert_data = {
             "alert_at_ms": self.alert_at_ms,
             "request_duration_ms": request_duration_ms,
             "request": {
@@ -56,16 +59,7 @@ class SlowAPIAlertMiddleware:
             },
             "sent_from": request.get_host()
         }
-        recipient_list = User.objects.filter(is_superuser=True).values_list("email", flat=True)
-
-        mail.send_mail(
-            subject="[Alert] Slow API detected",
-            message=render_to_string("./email/slow_api_alert/slow_api_alert.txt", context),
-            from_email=getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@divertise.asia"),
-            recipient_list=recipient_list,
-            html_message=render_to_string("./email/slow_api_alert/slow_api_alert.html", context),
-            fail_silently=False,
-        )
+        slow_api_alert_triggered.send(sender=self.__class__, alert_data=alert_data)
 
     def __call__(self, request):
         # Code to be executed for each request before
@@ -82,6 +76,7 @@ class SlowAPIAlertMiddleware:
         request_duration_ms = (resp_time - req_time).total_seconds() * 1000
 
         if request_duration_ms >= self.alert_at_ms:
-            self.send_mail_to_staff(request, response, request_duration_ms, request_at=req_time, response_at=resp_time)
+            self.trigger_alert(request, response, request_duration_ms, request_at=req_time, response_at=resp_time)
 
         return response
+
