@@ -1,5 +1,5 @@
 # Health Check Middleware
-For request path `{base_url}/ht/`, This middleware would ignore the `ALLOWED_HOSTS` validation which Django's `django.middleware.common.CommonMiddleware` calls request.get_host(), 
+If request path is `/ht` or `/ht/`, this middleware would ignore the `ALLOWED_HOSTS` validation which Django's `django.middleware.common.CommonMiddleware` calls request.get_host(), 
 
 ## Why?
 In some cases, the IP of health-checker is dynamic (i.e. AWS target group health check)
