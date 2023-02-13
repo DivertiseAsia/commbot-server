@@ -1,5 +1,5 @@
 # """
-# Book Manager's Book Views
+# Demo Manager's Book Views
 # """
 
 from rest_framework.reverse import reverse
