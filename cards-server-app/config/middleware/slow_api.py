@@ -5,7 +5,8 @@ from django.urls.exceptions import Resolver404
 from django.utils import timezone
 
 """
-Signal arguments: alert_data
+Signal arguments: 
+    alert_data: dict
 """
 slow_api_alert_triggered = Signal()
 
