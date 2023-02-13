@@ -10,7 +10,7 @@ User = get_user_model()
 
 
 @receiver(slow_api_alert_triggered)
-def handle_slow_api_alert_triggered(sender, alert_data):
+def handle_slow_api_alert_triggered(sender, alert_data, *args, **kwargs):
     recipient_list = User.objects.filter(is_superuser=True).values_list("email", flat=True)
 
     mail.send_mail(
