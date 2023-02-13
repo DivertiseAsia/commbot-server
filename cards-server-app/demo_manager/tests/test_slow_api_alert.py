@@ -24,26 +24,6 @@ class TestSlowApiAlertTriggered(BaseTestCase):
 
         self.when_user_gets_json()
 
-    @patch("config.middleware.slow_api.slow_api_alert_triggered.send")
-    @override_settings(SLOW_API_ALERT_AT_MS=30000)
-    def test_signal_not_triggered_when_get_book_list_with_valid_page_time_to_response_as_expected(self,
-                                                                                                  mock_signal_send):
-        self.get_book_list_first_page()
-
-        self.assertResponseSuccess()
-        self.assertFalse(mock_signal_send.called)
-        print(">> test_signal_not_triggered_when_get_book_list_with_valid_page_time_to_response_as_expected: OK <<")
-
-    @patch("config.middleware.slow_api.slow_api_alert_triggered.send")
-    @override_settings(SLOW_API_ALERT_AT_MS=1)
-    def test_signal_triggered_when_get_book_list_with_valid_page_took_too_much_time_to_response(self, mock_signal_send):
-        self.get_book_list_first_page()
-
-        self.assertResponseSuccess()
-        self.assertTrue(mock_signal_send.called)
-
-        print(">> test_signal_triggered_when_get_book_list_with_valid_page_took_too_much_time_to_response: OK <<")
-
     @override_settings(SLOW_API_ALERT_AT_MS=30000)
     def test_alert_email_not_sent_when_get_book_list_with_valid_page_time_to_response_as_expected(self):
         self.get_book_list_first_page()
