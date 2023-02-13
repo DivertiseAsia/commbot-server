@@ -15,18 +15,12 @@ class SlowAPIAlertMiddleware:
 
     def __init__(self, get_response):
         # One-time configuration and initialization.
-        self.alert_at_ms = None
-        self.alert_namespaces = None
+        self.alert_namespaces = getattr(settings, "SLOW_API_ALERT_NAMESPACES", None)
+        self.alert_at_ms = getattr(settings, "SLOW_API_ALERT_AT_MS", None)
         self.get_response = get_response
 
     def is_validate(self):
-        self.alert_namespaces = getattr(settings, "SLOW_API_ALERT_NAMESPACES", None)
-        self.alert_at_ms = getattr(settings, "SLOW_API_ALERT_AT_MS", None)
-
-        if not self.alert_at_ms or not self.alert_namespaces:
-            return False
-
-        return True
+        return self.alert_at_ms and self.alert_namespaces
 
     def is_api_alert_request(self, request):
         """
