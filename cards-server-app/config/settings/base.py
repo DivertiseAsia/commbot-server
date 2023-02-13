@@ -59,7 +59,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "config.middleware.healthcheck.HealthCheckMiddleware",  # healthcheck middleware need to add before others API middleware
+    "config.middleware.healthcheck.HealthCheckMiddleware",  # healthcheck middleware need to add before CommonMiddleware
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
