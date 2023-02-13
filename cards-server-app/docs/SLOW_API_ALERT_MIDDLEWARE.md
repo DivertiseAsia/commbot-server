@@ -13,8 +13,13 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
 ]
 ```
-2. Create a `signal` to handling the alert.
-
+2. Set configs.
+```python
+# config/settings.py
+SLOW_API_ALERT_NAMESPACES = ["demo", "v1", "rest_framework", "social", "password_reset"] # required
+SLOW_API_ALERT_AT_MS = 30000  # required
+```
+3. Create a `signal` to handling the alert.
 ```python
 # demo_manager/signals.py
 from django.dispatch import receiver
@@ -25,8 +30,7 @@ from config.middleware.slow_api import slow_api_alert_triggered
 def handle_slow_api_alert_triggered(sender, alert_data, *args, **kwargs):
     print("handle logic")
 ```
-
-3. Setup a `signal` for ready use
+4. Setup a `signal` for ready use.
    1. Add `ready` function in `AppConfig`
        ```python
        # demo_manager/apps.py
