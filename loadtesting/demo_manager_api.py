@@ -51,7 +51,7 @@ class DemoManagerTestAppAPI(TaskSet):
 
         with self.client.request(
             method="GET",
-            url=f"{self.api_path}/demo/books_w_index/",
+            url=f"{self.api_path}/demo/books/",  # TODO: change url to /books_w_index after merged with db-access-optimize branch
             headers=self.authorization_headers(),
             catch_response=True
         ) as books_response:
