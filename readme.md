@@ -28,6 +28,14 @@
 5. AWS_SECRET_ACCESS_KEY
 6. REPOSITORY_URL
 
+## Django Required Setting Variables
+On production these setting variables should not be `[""]` or `["*"]`
+for security reason
+
+1. [ALLOWED_HOSTS](https://docs.djangoproject.com/en/4.1/ref/settings/#allowed-hosts)
+2. [CORS_ALLOWED_ORIGINS or CORS_ALLOWED_ORIGIN_REGEXES](https://github.com/adamchainz/django-cors-headers#configuration)
+
+
 # AWS Environment Setup
 
 ## Deployment Users and Permissions

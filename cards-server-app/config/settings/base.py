@@ -58,7 +58,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "debug_toolbar.middleware.DebugToolbarMiddleware",
-    "corsheaders.middleware.CorsMiddleware",  # CorsMiddleware must be places before other middleware that can generate responses,
+    "corsheaders.middleware.CorsMiddleware",  # CorsMiddleware must be placed before other middleware that can generate responses,
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "config.middleware.healthcheck.HealthCheckMiddleware",  # healthcheck middleware need to add before CommonMiddleware
@@ -69,6 +69,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "config.middleware.failed_api.FailedAPIAlertMiddleware",  # FailedAPIAlertMiddleware must be placed the bottom of other request middles
 ]
 
 AUTH_USER_MODEL = "user_manager.User"
@@ -190,3 +191,6 @@ LOGGING = {
     },
     "loggers": {"setting_warnings": {"level": "WARNING"}},
 }
+# Failed API Alert Middleware
+FAILED_API_ALERT_NAMESPACES = SLOW_API_ALERT_NAMESPACES
+FAILED_API_ALERT_STATUS_CODES = [400]
