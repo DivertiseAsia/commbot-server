@@ -63,9 +63,9 @@ def create_profile_for_google_auth(sender, instance, created, **kwargs):
     # social_django will request extra_data from google after UserSocialAuth has been created.
     # for google provider, if extra_data has "access_token" it does mean that request extra_data has been called.
     if (
-        getattr(settings, "SOCIAL_AUTH_AUTO_CREATE_PROFILE", False)
-        and not instance.user.get_profile()
+        not instance.user.get_profile()
         and instance.provider == "google-oauth2"
+        and getattr(settings, "SOCIAL_AUTH_AUTO_CREATE_PROFILE", False)
         and instance.extra_data.get("access_token")
     ):
         extra_data = instance.extra_data
@@ -74,3 +74,11 @@ def create_profile_for_google_auth(sender, instance, created, **kwargs):
             first_name=extra_data.get("given_name", "Unknown"),
             last_name=extra_data.get("family_name", "Unknown"),
         )
+
+    if (
+        created
+        and not instance.user.verified
+        and getattr(settings, "SOCIAL_AUTH_AUTO_VERIFY_USER", False)
+    ):
+        instance.user.verified = True
+        instance.user.save()
