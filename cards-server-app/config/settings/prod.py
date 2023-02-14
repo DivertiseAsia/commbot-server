@@ -1,4 +1,17 @@
+import logging
 from .base import *
+
+logger = logging.getLogger("setting_warnings")
+
+# LOGGING
+LOGGING = {
+    "version": 1,
+    "loggers": {
+        "setting_warnings": {
+            "level": "WARNING"
+        },
+    }
+}
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
@@ -13,6 +26,13 @@ CSRF_COOKIE_SECURE = True
 
 ALLOWED_HOSTS = [""]  # TODO: Set ALLOWED_HOSTS
 CORS_ALLOWED_ORIGINS = [""]  # TODO: Set CORS_ALLOWED_ORIGINS or CORS_ALLOWED_ORIGIN_REGEXES
+
+if all([host in ["", "*"] for host in ALLOWED_HOSTS]):
+    logger.warning('WARNING: The settings.ALLOWED_HOSTS should not be "" or "*" on production. ')
+
+if all([origin in ["", "*"] for origin in CORS_ALLOWED_ORIGINS]):
+    logger.warning('WARNING: The settings.CORS_ALLOWED_ORIGINS should not be "" or "*" on production. ')
+
 
 DATABASES = {
     "default": {
