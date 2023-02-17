@@ -11,9 +11,14 @@ from config.middleware.slow_api import slow_api_alert_triggered
 
 User = get_user_model()
 
+logger = logging.getLogger("root")
+
 
 @receiver(slow_api_alert_triggered)
 def handle_slow_api_alert_triggered(sender, alert_data, *args, **kwargs):
+    logger.warning(f"WARNING: Slow API detected {alert_data['request']['method']} {alert_data['request']['url']} "
+                   f"request at: {alert_data['request']['at']}, response at: {alert_data['response']['at']}")
+
     recipient_list = User.objects.filter(is_superuser=True).values_list("email", flat=True)
 
     mail.send_mail(
