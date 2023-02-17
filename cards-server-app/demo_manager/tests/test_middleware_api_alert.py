@@ -20,6 +20,57 @@ class BaseMiddlewareTestCase(BaseTestCase):
         self.assertTrue(any([contain in output for output in output_logs]))
 
 
+class TestSlowApiAlertTriggered(BaseMiddlewareTestCase):
+    def setUp(self):
+        super().setUp()
+        self.staff_user = User.objects.create(email="staffuser@mockup.test", is_superuser=True)
+
+    def get_book_list_first_page(self):
+        self.given_url(reverse(f"demo:books-list"))
+        self.given_query_params({"page": 1})
+
+        self.when_user_gets_json()
+
+    @override_settings(SLOW_API_ALERT_AT_MS=30000)
+    def test_alert_email_not_sent_when_get_book_list_with_valid_page_time_to_response_as_expected(self):
+        self.get_book_list_first_page()
+
+        self.assertResponseSuccess()
+        self.assertEqual(len(mail.outbox), 0)
+        print(">> test_alert_email_not_sent_when__get_book_list_with_valid_page_time_to_response_as_expected: OK <<")
+
+    @override_settings(SLOW_API_ALERT_AT_MS=0.001)
+    def test_alert_email_sent_when_get_book_list_with_valid_page_took_time_to_response_more_than_expected(self):
+        self.get_book_list_first_page()
+
+        self.assertResponseSuccess()
+        self.assertEqual(len(mail.outbox), 1)
+        alert_email = mail.outbox[0]
+        self.assertEqual(alert_email.subject, "[Alert] Slow API detected")
+        self.assertIn(self.staff_user.email, alert_email.to)
+        print(">> test_alert_email_sent_when_get_book_list_with_valid_page_took_time_to_response_more_than_expected: "
+              "OK <<")
+
+    @override_settings(SLOW_API_ALERT_AT_MS=30000)
+    def test_logger_does_not_log_when_get_book_list_with_valid_page_time_to_response_as_expected(self):
+        with self.assertNoLogs('root', level='WARNING'):
+            self.get_book_list_first_page()
+
+        self.assertResponseSuccess()
+        print(">> test_logger_does_not_log_when_get_book_list_with_valid_page_time_to_response_as_expected: OK <<")
+
+    @override_settings(SLOW_API_ALERT_AT_MS=0.001)
+    def test_logger_does_log_when_get_book_list_with_valid_page_took_time_to_response_more_than_expected(self):
+
+        with self.assertLogs('root', level='WARNING') as cm:
+            self.get_book_list_first_page()
+
+        self.assertLogMessageContain("Slow API detected", output_logs=cm.output)
+        self.assertResponseSuccess()
+        print(">> test_logger_does_log_when_get_book_list_with_valid_page_took_time_to_response_more_than_expected: "
+              "OK <<")
+
+
 class TestFailedAPIAlertTriggered(BaseMiddlewareTestCase):
 
     @staticmethod
