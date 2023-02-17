@@ -59,7 +59,7 @@ urlpatterns = [
         include("django_rest_passwordreset.urls", namespace="password_reset"),
     ),
     path("trigger_error/", trigger_error),
-    path("ht/detail/", include("health_check.urls")),
+    path("ht/detail/", include("health_check.urls", namespace="healthcheck_detail")),
     path("__debug__/", include("debug_toolbar.urls")),
 
 ] + demo_manager_urls  # for demo_manager can remove

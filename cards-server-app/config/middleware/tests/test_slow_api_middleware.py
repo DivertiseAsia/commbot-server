@@ -14,28 +14,24 @@ User = get_user_model()
 
 class TestSlowApiAlertMiddleware(BaseTestCase):
 
-    def get_book_list_first_page(self):
-        self.given_url(reverse(f"demo:books-list"))
-        self.given_query_params({"page": 1})
-
-        self.when_user_gets_json()
+    def get_healthcheck_detail(self):
+        self.response = self.client.get("/ht/detail/")
 
     @patch("config.middleware.slow_api.slow_api_alert_triggered.send")
-    @override_settings(SLOW_API_ALERT_AT_MS=30000)
-    def test_signal_not_triggered_when_get_book_list_with_valid_page_time_to_response_as_expected(self,
-                                                                                                  mock_signal_send):
-        self.get_book_list_first_page()
+    @override_settings(SLOW_API_ALERT_AT_MS=30000, SLOW_API_ALERT_NAMESPACES=["healthcheck_detail"])
+    def test_signal_not_triggered_when_get_healthcheck_detail_took_expected_time_to_response(self, mock_signal_send):
+        self.get_healthcheck_detail()
 
         self.assertResponseSuccess()
         self.assertFalse(mock_signal_send.called)
-        print(">> test_signal_not_triggered_when_get_book_list_with_valid_page_time_to_response_as_expected: OK <<")
+        print(">> test_signal_not_triggered_when_get_healthcheck_detail_took_expected_time_to_response: OK <<")
 
     @patch("config.middleware.slow_api.slow_api_alert_triggered.send")
-    @override_settings(SLOW_API_ALERT_AT_MS=1)
-    def test_signal_triggered_when_get_book_list_with_valid_page_took_too_much_time_to_response(self, mock_signal_send):
-        self.get_book_list_first_page()
+    @override_settings(SLOW_API_ALERT_AT_MS=1, SLOW_API_ALERT_NAMESPACES=["healthcheck_detail"])
+    def test_signal_triggered_when_get_healthcheck_detail_took_too_much_time_to_response(self, mock_signal_send):
+        self.get_healthcheck_detail()
 
         self.assertResponseSuccess()
         self.assertTrue(mock_signal_send.called)
 
-        print(">> test_signal_triggered_when_get_book_list_with_valid_page_took_too_much_time_to_response: OK <<")
+        print(">> test_signal_triggered_when_get_healthcheck_detail_took_too_much_time_to_response: OK <<")
