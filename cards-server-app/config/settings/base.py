@@ -10,12 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+import logging
 import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -69,7 +69,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-
 ]
 
 AUTH_USER_MODEL = "user_manager.User"
@@ -131,7 +130,6 @@ REST_FRAMEWORK = {
     "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.NamespaceVersioning",
 }
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
@@ -148,7 +146,6 @@ LOGIN_REDIRECT_URL = "/"
 LOGOUT_URL = "rest_framework:logout"
 LOGOUT_REDIRECT_URL = "/admin"
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 STATIC_ROOT = "static"
@@ -163,8 +160,10 @@ FRONTEND_URL = "http://localhost:8080"
 DEFAULT_FROM_EMAIL = "support@divertise.asia"
 SUPER_ADMIN_PASS = os.environ.get("SUPER_ADMIN_PASS")
 
+# Social Auth Config
 SOCIAL_AUTH_JSONFIELD_ENABLED = True
 
+# Social Google Auth Config
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY")
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET")
 
@@ -172,3 +171,19 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_SEC
 # Slow API Alert Middleware
 SLOW_API_ALERT_NAMESPACES = ["demo", "v1", "rest_framework", "social", "password_reset"]
 SLOW_API_ALERT_AT_MS = 30000  # will alert when request take time >= 30 secs
+
+
+LOGGING = {
+    "version": 1,  # dict config format version
+    "disable_existing_loggers": False,  # retain the defaults loggers
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
+    "loggers": {"setting_warnings": {"level": "WARNING"}},
+}
