@@ -7,7 +7,6 @@ from django.utils.translation import gettext_lazy as _
 
 class Author(models.Model):
     name = models.CharField(max_length=255)
-    image = ResizeImageField(width=100, height=100, blank=True, null=True)
 
     class Meta:
         verbose_name = _("author")
