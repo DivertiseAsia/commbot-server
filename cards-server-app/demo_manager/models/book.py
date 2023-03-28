@@ -1,11 +1,13 @@
 import uuid
 
+from .resize_image import ResizeImageField
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
 class Author(models.Model):
     name = models.CharField(max_length=255)
+    image = ResizeImageField(width=100, height=100, blank=True, null=True)
 
     class Meta:
         verbose_name = _("author")
@@ -17,7 +19,9 @@ class Author(models.Model):
 
 class Book(models.Model):
     id = models.UUIDField(_("ID"), primary_key=True, default=uuid.uuid4, editable=False)
-    isbn = models.CharField(_("ISBN: The International Standard Book Number"), max_length=255, blank=True)
+    isbn = models.CharField(
+        _("ISBN: The International Standard Book Number"), max_length=255, blank=True
+    )
     title = models.CharField(_("Title"), max_length=255)
     authors = models.ManyToManyField(Author, blank=False, related_name="books")
     created_at = models.DateTimeField(_("Created At"), auto_now_add=True)
@@ -33,7 +37,9 @@ class Book(models.Model):
 
 class BookWithIndex(models.Model):
     id = models.UUIDField(_("ID"), primary_key=True, default=uuid.uuid4, editable=False)
-    isbn = models.CharField(_("ISBN: The International Standard Book Number"), max_length=255, blank=True)
+    isbn = models.CharField(
+        _("ISBN: The International Standard Book Number"), max_length=255, blank=True
+    )
     title = models.CharField(_("Title"), max_length=255, db_index=True)
     authors = models.ManyToManyField(Author, blank=False, related_name="books_w_index")
     created_at = models.DateTimeField(_("Created At"), auto_now_add=True)
