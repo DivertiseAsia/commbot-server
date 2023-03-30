@@ -99,3 +99,16 @@ for security reason
    2. Allow http and https for ipv4 and ipv6 to load balancer group
    3. Allow all ports from load balancer to ecs group
 10. Add Route53 A Record for api to load balancer
+
+# CustomImageField
+
+## Fields
+1. aspect_ratios (array) - If specified as None it will use the aspect ratio of the uploaded image. If specified a value - has to be a string with slash eg. "1/1", "16/9"
+2. file_types (array) - specifies the file types the image will be generated to
+3. container width (int) - used to limit the maximum width of layouts, to promote better readability on larger screens. We default to 1200px, but you can override this setting, via the PICTURES["CONTAINER_WIDTH"] setting.
+You may also set it to None, should you not use a container.
+4. width_field/height_field - to store the width and the height of the original image
+5. grid_columns (int) - will generate container_width/grid_column number of pictures (eg. container_width = 1200, grid_column=2, will generate 600w and 1200w (2 pictures)). We default to 12 columns, but you can override this setting, via the PICTURES["GRID_COLUMNS"] setting.
+6. pixel_densities (array of int) - generates pictures based on specified pixel densities eg. [1, 2] (will generate x2 images)
+7. breakpoints - specifies the images you want to create for each breakpoint.You may define your own breakpoints, they should be identical to the ones used in your css library. Simply override the PICTURES["BREAKPOINTS"] setting.
+8. max_file_size - specifies the largest size the image will be stored

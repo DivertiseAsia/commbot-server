@@ -5,45 +5,82 @@ from django.forms import forms
 from django.template.defaultfilters import filesizeformat
 from django.utils.translation import gettext_lazy as _
 
-from pictures import validators
-from pictures.models import PictureField
-from stdimage.models import StdImageField
+from pictures.models import PictureField, PictureFieldFile
 
 from pathlib import Path
 from PIL import Image
 from io import BytesIO
 
-# image_types = {
-#     "jpg": "JPEG",
-#     "jpeg": "JPEG",
-#     "png": "PNG",
-#     "gif": "GIF",
-#     "tif": "TIFF",
-#     "tiff": "TIFF",
-# }
+
+class CustomImageFieldFile(PictureFieldFile):
+    def save(self, name, content, save=True):
+        super().save(name, content, save)
+        self.save_all()
+
+    def save_all(self):
+        if self:
+            from . import tasks
+
+            tasks.process_picture(self)
+
+    def delete(self, save=True):
+        self.delete_all()
+        super().delete(save=save)
+
+    def delete_all(self, aspect_ratios=None):
+        aspect_ratios = aspect_ratios or self.aspect_ratios
+        for sources in aspect_ratios.values():
+            for srcset in sources.values():
+                for picture in srcset.values():
+                    picture.delete()
+
+    def update_all(self, from_aspect_ratios):
+        self.delete_all(from_aspect_ratios)
+        self.save_all()
+
+
+# inherit from PictureField (django-pictures)
+class CustomImageField(PictureField):
+    attr_class = CustomImageFieldFile
+
+    def __init__(
+        self,
+        verbose_name=None,
+        name=None,
+        max_file_size=None,
+        **kwargs,
+    ):
+        self.max_file_size = max_file_size
+        super().__init__(verbose_name, name, **kwargs)
+
+    def deconstruct(self):
+        name, path, args, kwargs = super().deconstruct()
+        return (
+            name,
+            path,
+            args,
+            {
+                **kwargs,
+                "max_file_size": self.max_file_size,
+            },
+        )
 
 
 class ExampleImage(models.Model):
     title = models.CharField(max_length=255)
-    picture_width = models.PositiveIntegerField(null=True)
-    picture_height = models.PositiveIntegerField(null=True)
-    picture = PictureField(
+    picture_width = models.PositiveIntegerField(null=True, blank=True)
+    picture_height = models.PositiveIntegerField(null=True, blank=True)
+    picture = CustomImageField(
         upload_to="pictures",
         aspect_ratios=[None],
-        file_types=["JPEG"],
+        file_types=["WEBP"],
+        container_width=1200,
         width_field="picture_width",
         height_field="picture_height",
+        grid_columns=1,
+        pixel_densities=[1],
         blank=True,
         null=True,
-    )
-    std_image = StdImageField(
-        upload_to="path/to/img",
-        blank=True,
-        null=True,
-        variations={
-            "large": (600, 400),
-        },
-        delete_orphans=True,
     )
 
 
