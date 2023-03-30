@@ -9,10 +9,10 @@ from .book import (
     BookWithIndexAdminView,
 )
 from .storage import UserBookStorageAdminView, UserBookStorage
-from .resize_image import ExamplePictureAdminView, ExamplePicture
+from .resize_image import ExampleImage, ExampleImageAdminView
 
 admin.site.register(Author, AuthorAdminView)
 admin.site.register(Book, BookAdminView)
 admin.site.register(BookWithIndex, BookWithIndexAdminView)
 admin.site.register(UserBookStorage, UserBookStorageAdminView)
-admin.site.register(ExamplePicture, ExamplePictureAdminView)
+admin.site.register(ExampleImage, ExampleImageAdminView)
