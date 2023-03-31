@@ -44,8 +44,8 @@ for security reason
 
 ## Setting up the Cloud
 
-1. Create a VPC named "project"-"env"-vpc with default settings
-   1. Ensure public vpc has **Enable auto-assign public IPv4 addressInfo** checked
+1. Create a VPC named "project"-"env"-vpc with default settings using VPC and more
+   1. Ensure public vpc subnets in "edit subnet settings" has **Enable auto-assign public IPv4 addressInfo** checked
 2. Create a RDS instance named "project"-"env"-db
    1. Template free (Single DB - Burstable t3 micro)
    2. Drop storage down to 20GB
@@ -54,7 +54,7 @@ for security reason
    5. Pick a username eg pu-"project"-"env and password - write both down and put it in the bitbucket deployment variables.
    6. Select Password & IAM database
    7. Create. Wait then grab url. Put host, database name, username, and password into bitbucket deployment variables.
-3. Create keypair eg "project"-"env"-kp using defaults. Save this pem file cause otherwise it's gone forever
+3. Create keypair eg "project"-"env"-kp changing to .pem type. Save this pem file cause otherwise it's gone forever
 4. Create ecs cluster
    1. Name it "project"-"env"
    2. If staging / dev you can choose **spot** otherwise suggest **demand**; lowest price is fine for **spot**
@@ -99,6 +99,47 @@ for security reason
    2. Allow http and https for ipv4 and ipv6 to load balancer group
    3. Allow all ports from load balancer to ecs group
 10. Add Route53 A Record for api to load balancer
+
+## Add S3 bucket permission for public folder: 
+1. Make sure bucket name does not include any "."'s 
+2. Click on bucket -> Permissions -> Block public access (bucket settings) Press Edit 
+3. Tick Block public access to buckets and objects granted through new access control lists (ACLs) 
+4. Tick Block public access to buckets and objects granted through any access control lists (ACLs) 
+5. Leave others unticked 
+6. Save 
+7. Go to bucket policy -> Edit: 
+8. Add JSON - https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-with-s3-actions.html 
+9. Link resource path to folder and all contents in it you want to be public 
+10. Save changes
+
+## Set up server HTTPS: 
+### Generate SSL Certificate 
+   1. Go to AWS Certificate Manager -> Certificates 
+   2. Request 
+   3. Request a public certificate 
+   4. Enter domain name, DNS validation, RSA 2048 
+   5. Request 
+### Set up load balancer to allow HTTPS 
+   1. Go to load balancer 
+   2. Add listener 
+   3. Select HTTPS 
+   4. Forward to app-env-tg 
+   5. Select your SSL certificate from step 1 
+   6. Add
+
+## Allow access through HTTPS only: 
+1. Go to load balancer 
+2. Select load balancer -> add listener 
+3. Add HTTP:80 port and redirect action to HTTPS:443
+
+## FAQ: 
+1. Where to check server logs - Go to ECS -> Clusters -> your cluster name -> Tasks -> select your task -> logs - or go to CloudWatch -> log groups -> /ecs/ 
+2. When cannot access server website: - Check if ECS task is running/recent - Check Cloudwatch loggroup logs 
+3. When agent failed to connect: 
+- Press on app-service in ECS -> Deployments and Events -> Events 
+- "service app-service was unable to place a task because no container instance met all of its requirements. The closest matching container-instance <container-id> doesn't have the agent connected. For more information, see the Troubleshooting section of the Amazon ECS Developer Guide." 
+- Go to EC2 instance -> Select -> Instance state -> Reboot instance 
+- Go to service -> select -> update
 
 # CustomImageField
 
