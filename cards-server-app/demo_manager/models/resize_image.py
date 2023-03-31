@@ -1,3 +1,4 @@
+from fractions import Fraction
 from django.core.files import File
 from django.db import models
 from django.db.models import ImageField
@@ -12,31 +13,52 @@ from PIL import Image
 from io import BytesIO
 
 
+image_types = {
+    "jpg": "JPEG",
+    "jpeg": "JPEG",
+    "png": "PNG",
+    "gif": "GIF",
+    "tif": "TIFF",
+    "tiff": "TIFF",
+}
+
+
+def image_resize(image, width, aspect_ratio):
+    file_object = None
+    with Image.open(image) as img:
+        aspect_ratio_num = Fraction(aspect_ratio) if aspect_ratio else None
+        if not aspect_ratio_num:
+            aspect_ratio_num = img.width / img.height
+        height = width / aspect_ratio_num
+        if img.width > width or img.height > height:
+            output_size = (width, height)
+            img.thumbnail(output_size)
+            img_filename = Path(image.file.name).name
+            img_suffix = Path(image.file.name).name.split(".")[-1]
+            img_format = image_types[img_suffix]
+            # TODO: test ensure that bytesIO clear out from memory
+            buffer = BytesIO()
+            img.save(buffer, format=img_format)
+            file_object = File(buffer)
+            # image.save(img_filename, file_object)
+    return file_object
+
+
 class CustomImageFieldFile(PictureFieldFile):
     def save(self, name, content, save=True):
-        super().save(name, content, save)
-        self.save_all()
+        # TODO: Resize ratio, File size
+        # Call fucntion resize_image super().save(name, resize_img, save)
+        # Modify original image
+        if not self.field.keep_original:
+            resized_image = image_resize(
+                content, self.field.container_width, self.field.aspect_ratios[0]
+            )
+            super().save(name, resized_image, save)
+        # Generate images
+        else:
+            super().save(name, content, save)
+            self.save_all()
 
-    def save_all(self):
-        if self:
-            from . import tasks
-
-            tasks.process_picture(self)
-
-    def delete(self, save=True):
-        self.delete_all()
-        super().delete(save=save)
-
-    def delete_all(self, aspect_ratios=None):
-        aspect_ratios = aspect_ratios or self.aspect_ratios
-        for sources in aspect_ratios.values():
-            for srcset in sources.values():
-                for picture in srcset.values():
-                    picture.delete()
-
-    def update_all(self, from_aspect_ratios):
-        self.delete_all(from_aspect_ratios)
-        self.save_all()
 
 
 # inherit from PictureField (django-pictures)
@@ -47,10 +69,12 @@ class CustomImageField(PictureField):
         self,
         verbose_name=None,
         name=None,
+        keep_original=True,
         max_file_size=None,
         **kwargs,
     ):
         self.max_file_size = max_file_size
+        self.keep_original = keep_original
         super().__init__(verbose_name, name, **kwargs)
 
     def deconstruct(self):
@@ -62,6 +86,7 @@ class CustomImageField(PictureField):
             {
                 **kwargs,
                 "max_file_size": self.max_file_size,
+                "keep_original": self.keep_original,
             },
         )
 
@@ -72,11 +97,12 @@ class ExampleImage(models.Model):
     picture_height = models.PositiveIntegerField(null=True, blank=True)
     picture = CustomImageField(
         upload_to="pictures",
-        aspect_ratios=[None],
+        aspect_ratios=["1/1"],
         file_types=["WEBP"],
         container_width=1200,
         width_field="picture_width",
         height_field="picture_height",
+        keep_original=False,
         grid_columns=1,
         pixel_densities=[1],
         blank=True,
@@ -142,20 +168,6 @@ class ExampleImage(models.Model):
 #     #         pass
 
 #     #     return data
-
-
-# def image_resize(image, width, height):
-#     img = Image.open(image)
-#     if img.width > width or img.height > height:
-#         output_size = (width, height)
-#         img.thumbnail(output_size)
-#         img_filename = Path(image.file.name).name
-#         img_suffix = Path(image.file.name).name.split(".")[-1]
-#         img_format = image_types[img_suffix]
-#         buffer = BytesIO()
-#         img.save(buffer, format=img_format)
-#         file_object = File(buffer)
-#         image.save(img_filename, file_object)
 
 
 # class ExamplePicture(models.Model):
