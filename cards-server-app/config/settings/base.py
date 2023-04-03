@@ -194,3 +194,7 @@ LOGGING = {
 # Failed API Alert Middleware
 FAILED_API_ALERT_NAMESPACES = SLOW_API_ALERT_NAMESPACES
 FAILED_API_ALERT_STATUS_CODES = [400]
+
+FILE_UPLOAD_HANDLERS = [
+    "django.core.files.uploadhandler.TemporaryFileUploadHandler",
+]
