@@ -1,4 +1,4 @@
-from config.helpers import CustomImageField
+from config.image_helpers import CustomImageField
 from django.db import models
 
 
