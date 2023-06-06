@@ -167,6 +167,11 @@ SOCIAL_AUTH_JSONFIELD_ENABLED = True
 # Social Google Auth Config
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY")
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET")
+SCOPE = [
+    "openid",
+    "email",
+    "https://www.googleapis.com/auth/userinfo.profile",
+]  # scopes should be matched to frontend
 
 # Social Google Auth auto create Profile
 SOCIAL_AUTH_AUTO_CREATE_PROFILE = True
@@ -198,3 +203,32 @@ FAILED_API_ALERT_STATUS_CODES = [400]
 FILE_UPLOAD_HANDLERS = [
     "django.core.files.uploadhandler.TemporaryFileUploadHandler",
 ]
+
+
+def get_database_dict():
+    import re
+
+    heroku_db_details = dict()
+    HEROKU_DATABASE_URL = os.environ.get("DATABASE_URL")
+
+    if HEROKU_DATABASE_URL:
+        match_db_url = re.match(
+            r"^postgres://(?P<RDS_USERNAME>\S+):(?P<RDS_PASSWORD>\S+)@(?P<RDS_HOST>\S+):(?P<RDS_PORT>\S+)/(?P<RDS_DB_NAME>\S+)$",
+            HEROKU_DATABASE_URL,
+        )
+        if match_db_url:
+            heroku_db_details = match_db_url.groupdict()
+
+    def get_from_environ_or_heroku(key, default=""):
+        return os.environ.get(key, heroku_db_details.get(key, default))
+
+    return {
+        "ENGINE": get_from_environ_or_heroku(
+            "RDS_ENGINE", "django.db.backends.postgresql"
+        ),
+        "NAME": get_from_environ_or_heroku("RDS_DB_NAME"),
+        "USER": get_from_environ_or_heroku("RDS_USERNAME"),
+        "PASSWORD": get_from_environ_or_heroku("RDS_PASSWORD"),
+        "HOST": get_from_environ_or_heroku("RDS_HOST"),
+        "PORT": get_from_environ_or_heroku("RDS_PORT", "5432"),
+    }

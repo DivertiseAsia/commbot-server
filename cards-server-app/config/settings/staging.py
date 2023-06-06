@@ -14,16 +14,9 @@ CSRF_COOKIE_SECURE = True
 ALLOWED_HOSTS = ["*"]
 CORS_ORIGIN_ALLOW_ALL = True
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("RDS_DB_NAME"),
-        "USER": os.environ.get("RDS_USERNAME"),
-        "PASSWORD": os.environ.get("RDS_PASSWORD"),
-        "HOST": os.environ.get("RDS_HOST"),
-        "PORT": os.environ.get("RDS_PORT", "5432"),
-    }
-}
+db_dict = get_database_dict()
+DATABASES = {"default": db_dict}
+
 
 AWS_STORAGE_BUCKET_NAME = "cards-staging"
 AWS_S3_CUSTOM_DOMAIN = "%s.s3.amazonaws.com" % AWS_STORAGE_BUCKET_NAME
