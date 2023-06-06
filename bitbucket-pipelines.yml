@@ -40,7 +40,7 @@ definitions:
             variables:
               HEROKU_API_KEY: $HEROKU_API_KEY
               HEROKU_APP_NAME: $HEROKU_APP_NAME
-              ZIP_FILE: "application.tar.gz"
+              ZIP_FILE: "cards-server-app/application.tar.gz"
     - step: &deployaws
         name: Deploy via AWS
         image: docker:latest
