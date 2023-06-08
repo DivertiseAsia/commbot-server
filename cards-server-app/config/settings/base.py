@@ -232,3 +232,7 @@ def get_database_dict():
         "HOST": get_from_environ_or_heroku("RDS_HOST"),
         "PORT": get_from_environ_or_heroku("RDS_PORT", "5432"),
     }
+
+
+LINE_CHANNEL_ACCESS_TOKEN = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN", "")
+LINE_CHANNEL_SECRET = os.environ.get("LINE_CHANNEL_SECRET", "")
