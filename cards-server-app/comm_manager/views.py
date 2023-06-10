@@ -1,19 +1,21 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.utils import timezone
 
-from django.conf import settings
-from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (
     MessageEvent,
     TextMessage,
     TextSendMessage,
     FlexSendMessage,
+    FollowEvent,
+    UnfollowEvent,
 )
+import json
 
-line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
-handler = WebhookHandler(settings.LINE_CHANNEL_SECRET)
+from comm_manager.models import Chat
+from apis import handler, line_bot_api
 
 
 class CommViewSet(viewsets.GenericViewSet):
@@ -72,6 +74,28 @@ def handle_message(event):
             ),
         )
     else:
+        Chat.objects.get_or_create(
+            external_id=event.source.user.user_id, chat_type=Chat.ChatType.INDIVIDUAL
+        )
         line_bot_api.reply_message(
             event.reply_token, TextSendMessage(text=event.message.text)
         )
+
+
+@handler.add(FollowEvent)
+def handle_followevent(event):
+    print("handle follow event", json.dumps(event))
+    Chat.objects.get_or_create(
+        external_id=event.source.user.user_id, chat_type=Chat.ChatType.INDIVIDUAL
+    )
+
+
+@handler.add(UnfollowEvent)
+def handle_unfollowevent(event):
+    chat, _ = Chat.objects.get_or_create(
+        external_id=event.source.user.user_id, chat_type=Chat.ChatType.INDIVIDUAL
+    )
+    chat.ended_date = timezone.now()
+    chat.save()
+
+    print("handle unfollow event")

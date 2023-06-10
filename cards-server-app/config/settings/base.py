@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "config",
     "user_manager",
     "demo_manager",
+    "comm_manager",
     "django_filters",
     "debug_toolbar",
 ]
