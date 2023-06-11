@@ -66,20 +66,22 @@ def handle_message(event):
             scryfall_card_image,
             scryfall_card_price,
         )
-        from .helpers import flex_json_card_image_with_price
+        from .helpers import flex_json_card_image_with_price, carousel
 
+        card_images = []
         for match in lookup_matches:
             cards = scryfall_search(match)
             card = scryfall_first_card(cards)
             image = scryfall_card_image(card)
             price = scryfall_card_price(card)
-            line_bot_api.reply_message(
-                event.reply_token,
-                FlexSendMessage(
-                    alt_text="Some card",
-                    contents=flex_json_card_image_with_price(image, price),
-                ),
-            )
+            card_images.append(flex_json_card_image_with_price(image, price))
+        line_bot_api.reply_message(
+            event.reply_token,
+            FlexSendMessage(
+                alt_text="Some card",
+                contents=carousel(card_images),
+            ),
+        )
     else:
         Chat.objects.get_or_create(
             external_id=event.source.user_id, chat_type=Chat.ChatType.INDIVIDUAL

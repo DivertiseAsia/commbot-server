@@ -1,3 +1,7 @@
+def carousel(items):
+    return {"type": "carousel", "contents": items}
+
+
 def flex_json_card_image_with_price(image, price):
     return {
         "type": "bubble",

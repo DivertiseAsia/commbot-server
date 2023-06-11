@@ -117,4 +117,4 @@ class TestLineViews(BaseTestCase):
         )
         handle_message(event)
         mock_scryfall.assert_has_calls([call("something"), call("dog")], any_order=True)
-        assert mock_reply.called
+        mock_reply.assert_called_once()
