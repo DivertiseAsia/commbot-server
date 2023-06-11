@@ -13,16 +13,14 @@ class TestLineViews(BaseTestCase):
         from munch import DefaultMunch
 
         undefined = object()
-        return DefaultMunch.fromDict(
-            {"source": {"user": {"user_id": user_id}}}, undefined
-        )
+        return DefaultMunch.fromDict({"source": {"user_id": user_id}}, undefined)
 
     def given_message_event(self, message, user_id):
         from munch import DefaultMunch
 
         undefined = object()
         return DefaultMunch.fromDict(
-            {"message": {"text": message}, "source": {"user": {"user_id": user_id}}},
+            {"message": {"text": message}, "source": {"user_id": user_id}},
             undefined,
         )
 

@@ -75,7 +75,7 @@ def handle_message(event):
         )
     else:
         Chat.objects.get_or_create(
-            external_id=event.source.user.user_id, chat_type=Chat.ChatType.INDIVIDUAL
+            external_id=event.source.user_id, chat_type=Chat.ChatType.INDIVIDUAL
         )
         line_bot_api.reply_message(
             event.reply_token, TextSendMessage(text=event.message.text)
@@ -86,14 +86,14 @@ def handle_message(event):
 def handle_followevent(event):
     print("handle follow event", json.dumps(event))
     Chat.objects.get_or_create(
-        external_id=event.source.user.user_id, chat_type=Chat.ChatType.INDIVIDUAL
+        external_id=event.source.user_id, chat_type=Chat.ChatType.INDIVIDUAL
     )
 
 
 @handler.add(UnfollowEvent)
 def handle_unfollowevent(event):
     chat, _ = Chat.objects.get_or_create(
-        external_id=event.source.user.user_id, chat_type=Chat.ChatType.INDIVIDUAL
+        external_id=event.source.user_id, chat_type=Chat.ChatType.INDIVIDUAL
     )
     chat.ended_date = timezone.now()
     chat.save()
