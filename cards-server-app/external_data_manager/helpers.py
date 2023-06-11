@@ -23,12 +23,17 @@ def scryfall_search(query):
     }
 
     response = requests.get(url, params=params)
-    data = response.json()
 
-    if data["object"] == "error":
-        return None
+    if response.status_code == 200:
+        data = response.json()
 
-    if data["total_cards"] > 0:
-        return data["data"]
+        if data["object"] == "error":
+            print("Scryfall had an error", data)
+            return None
+
+        if data["total_cards"] > 0:
+            return data["data"]
     else:
-        return None
+        print("scryfall had an issue code:", response.status_code)
+        print("error:", response.json())
+    return None
