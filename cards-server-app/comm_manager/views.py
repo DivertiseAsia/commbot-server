@@ -26,7 +26,6 @@ class CommViewSet(viewsets.GenericViewSet):
     )
     def webhook(self, request):
         # get X-Line-Signature header value
-        print("got webhook")
         try:
             signature = request.headers["X-Line-Signature"]
         except KeyError:
@@ -37,7 +36,6 @@ class CommViewSet(viewsets.GenericViewSet):
 
         # get request body as text
         body = request.body.decode("utf-8")
-        print("body", body)
 
         # handle webhook body
         try:
@@ -84,7 +82,6 @@ def handle_message(event):
 
 @handler.add(FollowEvent)
 def handle_followevent(event):
-    print("handle follow event", json.dumps(event))
     Chat.objects.get_or_create(
         external_id=event.source.user_id, chat_type=Chat.ChatType.INDIVIDUAL
     )
@@ -97,5 +94,3 @@ def handle_unfollowevent(event):
     )
     chat.ended_date = timezone.now()
     chat.save()
-
-    print("handle unfollow event")
