@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils import timezone
+import re
 
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (
@@ -49,18 +50,25 @@ class CommViewSet(viewsets.GenericViewSet):
         return Response(status=status.HTTP_200_OK)
 
 
+LOOKUP_DATA_VIA_API = re.compile(
+    r"\[\[([^]]*)\]\]",
+)
+
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    if len(event.message.text) > 5:
+    message_text = event.message.text
+    lookup_matches = LOOKUP_DATA_VIA_API.search(message_text)
+    if lookup_matches:
         from external_data_manager.helpers import (
             scryfall_search,
             scryfall_first_card,
             scryfall_card_image,
             scryfall_card_price,
         )
-        from helpers import flex_json_card_image_with_price
+        from .helpers import flex_json_card_image_with_price
 
-        cards = scryfall_search(event.message.text)
+        cards = scryfall_search(lookup_matches.group(1))
         card = scryfall_first_card(cards)
         image = scryfall_card_image(card)
         price = scryfall_card_price(card)
@@ -76,7 +84,7 @@ def handle_message(event):
             external_id=event.source.user_id, chat_type=Chat.ChatType.INDIVIDUAL
         )
         line_bot_api.reply_message(
-            event.reply_token, TextSendMessage(text=event.message.text)
+            event.reply_token, TextSendMessage(text=message_text)
         )
 
 

@@ -90,7 +90,19 @@ class TestLineViews(BaseTestCase):
     def test_user_messages_bot_without_card_search_and_does_not_hit_scryfall(
         self, mock_reply, mock_scryfall
     ):
-        event = self.given_message_event("msg", "abcd")
+        event = self.given_message_event("This is a decently long message", "userid1")
         handle_message(event)
         assert not mock_scryfall.called
+        assert mock_reply.called
+
+    @patch("external_data_manager.helpers.scryfall_search")
+    @patch("comm_manager.apis.line_bot_api.reply_message")
+    def test_user_messages_bot_with_card_search_and_will_hit_scryfall(
+        self, mock_reply, mock_scryfall
+    ):
+        event = self.given_message_event(
+            "This will hit scryfall with [[something]]", "userid1"
+        )
+        handle_message(event)
+        mock_scryfall.assert_called_with("something")
         assert mock_reply.called
