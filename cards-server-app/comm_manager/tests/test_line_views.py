@@ -1,7 +1,7 @@
 from config.helpers import BaseTestCase
 from comm_manager.models import Chat
 from comm_manager.views import handle_followevent, handle_message, handle_unfollowevent
-from unittest.mock import patch
+from unittest.mock import patch, call
 import time
 
 
@@ -104,5 +104,17 @@ class TestLineViews(BaseTestCase):
             "This will hit scryfall with [[something]]", "userid1"
         )
         handle_message(event)
-        mock_scryfall.assert_called_with("something")
+        mock_scryfall.assert_called_once_with("something")
+        assert mock_reply.called
+
+    @patch("external_data_manager.helpers.scryfall_search")
+    @patch("comm_manager.apis.line_bot_api.reply_message")
+    def test_user_messages_bot_with_multiple_card_search_and_will_hit_scryfall(
+        self, mock_reply, mock_scryfall
+    ):
+        event = self.given_message_event(
+            "This will hit scryfall with [[something]] [[dog]]", "userid1"
+        )
+        handle_message(event)
+        mock_scryfall.assert_has_calls([call("something"), call("dog")], any_order=True)
         assert mock_reply.called

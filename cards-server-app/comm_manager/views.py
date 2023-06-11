@@ -58,7 +58,7 @@ LOOKUP_DATA_VIA_API = re.compile(
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     message_text = event.message.text
-    lookup_matches = LOOKUP_DATA_VIA_API.search(message_text)
+    lookup_matches = LOOKUP_DATA_VIA_API.findall(message_text)
     if lookup_matches:
         from external_data_manager.helpers import (
             scryfall_search,
@@ -68,17 +68,18 @@ def handle_message(event):
         )
         from .helpers import flex_json_card_image_with_price
 
-        cards = scryfall_search(lookup_matches.group(1))
-        card = scryfall_first_card(cards)
-        image = scryfall_card_image(card)
-        price = scryfall_card_price(card)
-        line_bot_api.reply_message(
-            event.reply_token,
-            FlexSendMessage(
-                alt_text="Some card",
-                contents=flex_json_card_image_with_price(image, price),
-            ),
-        )
+        for match in lookup_matches:
+            cards = scryfall_search(match)
+            card = scryfall_first_card(cards)
+            image = scryfall_card_image(card)
+            price = scryfall_card_price(card)
+            line_bot_api.reply_message(
+                event.reply_token,
+                FlexSendMessage(
+                    alt_text="Some card",
+                    contents=flex_json_card_image_with_price(image, price),
+                ),
+            )
     else:
         Chat.objects.get_or_create(
             external_id=event.source.user_id, chat_type=Chat.ChatType.INDIVIDUAL
