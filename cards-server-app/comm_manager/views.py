@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils import timezone
 import re
+import time
 
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (
@@ -75,6 +76,7 @@ def handle_message(event):
             image = scryfall_card_image(card)
             price = scryfall_card_price(card)
             card_images.append(flex_json_card_image_with_price(image, price))
+            time.sleep(0.2)
         line_bot_api.reply_message(
             event.reply_token,
             FlexSendMessage(
