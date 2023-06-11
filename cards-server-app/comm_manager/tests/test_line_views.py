@@ -1,6 +1,12 @@
 from config.helpers import BaseTestCase
 from comm_manager.models import Chat
-from comm_manager.views import handle_followevent, handle_message, handle_unfollowevent
+from comm_manager.views import (
+    handle_followevent,
+    handle_message,
+    handle_unfollowevent,
+    handle_joinevent,
+    handle_leaveevent,
+)
 from unittest.mock import patch, call
 import time
 
@@ -21,6 +27,18 @@ class TestLineViews(BaseTestCase):
         undefined = object()
         return DefaultMunch.fromDict(
             {"message": {"text": message}, "source": {"user_id": user_id}},
+            undefined,
+        )
+
+    def given_event_with_group_details(self, message, user_id, group_id):
+        from munch import DefaultMunch
+
+        undefined = object()
+        return DefaultMunch.fromDict(
+            {
+                "message": {"text": message},
+                "source": {"user_id": user_id, "group_id": group_id},
+            },
             undefined,
         )
 
@@ -118,3 +136,48 @@ class TestLineViews(BaseTestCase):
         handle_message(event)
         mock_scryfall.assert_has_calls([call("something"), call("dog")], any_order=True)
         mock_reply.assert_called_once()
+
+    @patch("comm_manager.apis.line_bot_api.reply_message")
+    def test_user_invites_bot_to_group_chat_creates_chat_if_none_exists(self, mock):
+        self.assertEquals(0, Chat.objects.filter(external_id="group1").count())
+        event = self.given_event_with_group_details("msg", "abc", "group1")
+        handle_joinevent(event)
+
+        related_chat = Chat.objects.get(external_id="group1")
+        self.assertEquals(related_chat.chat_type, Chat.ChatType.GROUP)
+
+    @patch("comm_manager.apis.line_bot_api.reply_message")
+    def test_user_invites_bot_to_group_chat_does_not_explode_if_done_twice(self, mock):
+        self.assertEquals(0, Chat.objects.filter(external_id="group1").count())
+        event = self.given_event_with_group_details("msg", "abc", "group1")
+        handle_joinevent(event)
+
+        self.assertEquals(1, Chat.objects.filter(external_id="group1").count())
+        handle_joinevent(event)
+        self.assertEquals(1, Chat.objects.filter(external_id="group1").count())
+
+    @patch("comm_manager.apis.line_bot_api.reply_message")
+    def test_leaves_group_chat_does_not_explode_if_done_twice(self, mock):
+        event = self.given_event_with_group_details("msg", "abc", "group1")
+        handle_joinevent(event)
+
+        chat = Chat.objects.get(external_id="group1")
+        self.assertEquals(None, chat.ended_date)
+
+        handle_leaveevent(event)
+
+        chat.refresh_from_db()
+        self.assertNotEquals(None, chat.ended_date)
+
+        handle_leaveevent(event)
+        self.assertEquals(1, Chat.objects.filter(external_id="group1").count())
+
+    @patch("comm_manager.apis.line_bot_api.reply_message")
+    def test_leaves_group_chat_does_not_explode_no_existing_chat(self, mock):
+        self.assertEquals(0, Chat.objects.filter(external_id="group1").count())
+        event = self.given_event_with_group_details("msg", "abc", "group1")
+
+        handle_leaveevent(event)
+
+        chat = Chat.objects.get(external_id="group1")
+        self.assertNotEquals(None, chat.ended_date)

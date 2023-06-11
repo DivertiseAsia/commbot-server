@@ -13,6 +13,8 @@ from linebot.models import (
     FlexSendMessage,
     FollowEvent,
     UnfollowEvent,
+    JoinEvent,
+    LeaveEvent,
 )
 import json
 
@@ -104,6 +106,22 @@ def handle_followevent(event):
 def handle_unfollowevent(event):
     chat, _ = Chat.objects.get_or_create(
         external_id=event.source.user_id, chat_type=Chat.ChatType.INDIVIDUAL
+    )
+    chat.ended_date = timezone.now()
+    chat.save()
+
+
+@handler.add(JoinEvent)
+def handle_joinevent(event):
+    Chat.objects.get_or_create(
+        external_id=event.source.group_id, chat_type=Chat.ChatType.GROUP
+    )
+
+
+@handler.add(LeaveEvent)
+def handle_leaveevent(event):
+    chat, _ = Chat.objects.get_or_create(
+        external_id=event.source.group_id, chat_type=Chat.ChatType.GROUP
     )
     chat.ended_date = timezone.now()
     chat.save()
