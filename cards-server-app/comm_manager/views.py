@@ -15,7 +15,7 @@ from linebot.models import (
 import json
 
 from comm_manager.models import Chat
-from apis import handler, line_bot_api
+from comm_manager.apis import handler, line_bot_api
 
 
 class CommViewSet(viewsets.GenericViewSet):
