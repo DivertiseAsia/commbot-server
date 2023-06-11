@@ -42,7 +42,7 @@ class TestLineViews(BaseTestCase):
 
         self.assertEquals(1, Chat.objects.filter(external_id="abc").count())
 
-    @patch("apis.line_bot_api.reply_message")
+    @patch("comm_manager.apis.line_bot_api.reply_message")
     def test_user_messages_bot_first_time_creates_chat_if_none_exists(self, mock):
         self.assertEquals(0, Chat.objects.filter(external_id="abc").count())
         event = self.given_message_event("msg", "abc")
@@ -51,7 +51,7 @@ class TestLineViews(BaseTestCase):
         related_chat = Chat.objects.get(external_id="abc")
         self.assertEquals(related_chat.chat_type, Chat.ChatType.INDIVIDUAL)
 
-    @patch("apis.line_bot_api.reply_message")
+    @patch("comm_manager.apis.line_bot_api.reply_message")
     def test_user_messages_bot_later_time_does_not_make_a_second(self, mock):
         self.assertEquals(0, Chat.objects.filter(external_id="abc").count())
         event = self.given_message_event("msg", "abc")
@@ -84,3 +84,13 @@ class TestLineViews(BaseTestCase):
         self.assertNotEquals(None, related_chat.ended_date)
 
     # TODO group related ones
+
+    @patch("external_data_manager.helpers.scryfall_search")
+    @patch("comm_manager.apis.line_bot_api.reply_message")
+    def test_user_messages_bot_without_card_search_and_does_not_hit_scryfall(
+        self, mock_reply, mock_scryfall
+    ):
+        event = self.given_message_event("msg", "abcd")
+        handle_message(event)
+        assert not mock_scryfall.called
+        assert mock_reply.called
