@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "user_manager",
     "demo_manager",
     "comm_manager",
+    "external_data_manager",
     "django_filters",
     "debug_toolbar",
 ]
