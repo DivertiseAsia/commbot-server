@@ -65,24 +65,23 @@ def handle_message(event):
     if lookup_matches:
         from external_data_manager.helpers import (
             scryfall_search,
-            scryfall_first_card,
-            scryfall_card_image,
-            scryfall_card_price,
         )
         from .helpers import flex_json_card_image_with_price, carousel
 
         card_images = []
+        card_alts = []
         for match in lookup_matches:
-            cards = scryfall_search(match)
-            card = scryfall_first_card(cards)
-            image = scryfall_card_image(card)
-            price = scryfall_card_price(card)
-            card_images.append(flex_json_card_image_with_price(image, price))
+            card = scryfall_search(match)
+            if card:
+                card_alts.append(card.name + " " + card.mana_cost)
+                card_images.append(
+                    flex_json_card_image_with_price(card.image_url, card.price)
+                )
             time.sleep(0.2)
         line_bot_api.reply_message(
             event.reply_token,
             FlexSendMessage(
-                alt_text="Some card",
+                alt_text=", ".join(card_alts),
                 contents=carousel(card_images),
             ),
         )
