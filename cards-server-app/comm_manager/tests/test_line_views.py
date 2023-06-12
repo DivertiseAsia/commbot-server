@@ -118,6 +118,7 @@ class TestLineViews(BaseTestCase):
     def test_user_messages_bot_with_card_search_and_will_hit_scryfall(
         self, mock_reply, mock_scryfall
     ):
+        mock_scryfall.return_value = None
         event = self.given_message_event(
             "This will hit scryfall with [[something]]", "userid1"
         )
@@ -130,6 +131,7 @@ class TestLineViews(BaseTestCase):
     def test_user_messages_bot_with_multiple_card_search_and_will_hit_scryfall(
         self, mock_reply, mock_scryfall
     ):
+        mock_scryfall.return_value = None
         event = self.given_message_event(
             "This will hit scryfall with [[something]] [[dog]]", "userid1"
         )
