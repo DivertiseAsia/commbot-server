@@ -60,7 +60,7 @@ LOOKUP_DATA_VIA_API = re.compile(
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    Chat.objects.get_or_create(
+    chat, _ = Chat.objects.get_or_create(
         external_id=event.source.user_id, chat_type=Chat.ChatType.INDIVIDUAL
     )
     message_text = event.message.text
@@ -88,7 +88,7 @@ def handle_message(event):
                 contents=carousel(card_images),
             ),
         )
-    else:
+    elif chat.is_mirrorreply_feature_on:
         line_bot_api.reply_message(
             event.reply_token, TextSendMessage(text=message_text)
         )

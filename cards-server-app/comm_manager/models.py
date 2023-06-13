@@ -15,5 +15,6 @@ class Chat(models.Model):
     external_id = models.CharField(
         _("External ID (from Provider)"), max_length=255, blank=True, db_index=True
     )
+    is_mirrorreply_feature_on = models.BooleanField(default=False)
     # TODO: current members
     # TODO: lifetime members

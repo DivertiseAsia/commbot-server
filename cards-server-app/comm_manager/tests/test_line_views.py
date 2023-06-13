@@ -7,7 +7,8 @@ from comm_manager.views import (
     handle_joinevent,
     handle_leaveevent,
 )
-from unittest.mock import patch, call
+from linebot.models import TextSendMessage
+from unittest.mock import patch, call, ANY
 import time
 
 
@@ -121,6 +122,12 @@ class TestLineViews(BaseTestCase):
     def test_user_messages_bot_without_card_search_and_does_not_hit_scryfall(
         self, mock_reply, mock_scryfall
     ):
+        c = Chat.objects.create(
+            external_id="userid1",
+            chat_type=Chat.ChatType.INDIVIDUAL,
+            is_mirrorreply_feature_on=True,
+        )
+        c.save()
         event = self.given_message_event("This is a decently long message", "userid1")
         handle_message(event)
         assert not mock_scryfall.called
@@ -196,3 +203,16 @@ class TestLineViews(BaseTestCase):
 
         chat = Chat.objects.get(external_id="group1")
         self.assertNotEquals(None, chat.ended_date)
+
+    @patch("comm_manager.apis.line_bot_api.reply_message")
+    def test_user_normal_messages_bot_if_mirrorreply_off_skips(self, mock):
+        c = Chat.objects.create(
+            external_id="abc",
+            chat_type=Chat.ChatType.INDIVIDUAL,
+            is_mirrorreply_feature_on=False,
+        )
+        c.save()
+        event = self.given_message_event("msg", "abc")
+        handle_message(event)
+
+        assert not mock.called
