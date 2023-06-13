@@ -60,9 +60,14 @@ LOOKUP_DATA_VIA_API = re.compile(
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    chat, _ = Chat.objects.get_or_create(
-        external_id=event.source.user_id, chat_type=Chat.ChatType.INDIVIDUAL
-    )
+    ## TODO: Fix this. It cannot assume it's a individual chat... causes bugs
+    chat_id = event.source.user_id
+    chat_type = Chat.ChatType.INDIVIDUAL
+    if "group_id" in event.source and event.source.group_id:
+        chat_id = event.source.group_id
+        chat_type = Chat.ChatType.GROUP
+    chat, _ = Chat.objects.get_or_create(external_id=chat_id, chat_type=chat_type)
+
     message_text = event.message.text
     lookup_matches = LOOKUP_DATA_VIA_API.findall(message_text)
     if lookup_matches:

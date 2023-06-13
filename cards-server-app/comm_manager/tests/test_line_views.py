@@ -31,6 +31,18 @@ class TestLineViews(BaseTestCase):
             undefined,
         )
 
+    def given_message_event_in_group(self, message, user_id, group_id):
+        from munch import DefaultMunch
+
+        undefined = object()
+        return DefaultMunch.fromDict(
+            {
+                "message": {"text": message},
+                "source": {"user_id": user_id, "group_id": group_id},
+            },
+            undefined,
+        )
+
     def given_event_with_group_details(self, message, user_id, group_id):
         from munch import DefaultMunch
 
@@ -82,6 +94,19 @@ class TestLineViews(BaseTestCase):
 
         related_chat = Chat.objects.get(external_id="abc")
         self.assertEquals(related_chat.chat_type, Chat.ChatType.INDIVIDUAL)
+
+    @patch("external_data_manager.helpers.scryfall_search")
+    @patch("comm_manager.apis.line_bot_api.reply_message")
+    def test_user_messages_bot_first_time_from_group_creates_chat_if_none_exists_event_as_search(
+        self, mock, mock_scryfall
+    ):
+        mock_scryfall.return_value = None
+        self.assertEquals(0, Chat.objects.filter(external_id="groupA").count())
+        event = self.given_message_event_in_group("[[msg]]", "abc", "groupA")
+        handle_message(event)
+
+        related_chat = Chat.objects.get(external_id="groupA")
+        self.assertEquals(related_chat.chat_type, Chat.ChatType.GROUP)
 
     @patch("comm_manager.apis.line_bot_api.reply_message")
     def test_user_messages_bot_later_time_does_not_make_a_second(self, mock):
