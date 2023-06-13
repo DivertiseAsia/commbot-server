@@ -60,6 +60,9 @@ LOOKUP_DATA_VIA_API = re.compile(
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+    Chat.objects.get_or_create(
+        external_id=event.source.user_id, chat_type=Chat.ChatType.INDIVIDUAL
+    )
     message_text = event.message.text
     lookup_matches = LOOKUP_DATA_VIA_API.findall(message_text)
     if lookup_matches:
@@ -86,9 +89,6 @@ def handle_message(event):
             ),
         )
     else:
-        Chat.objects.get_or_create(
-            external_id=event.source.user_id, chat_type=Chat.ChatType.INDIVIDUAL
-        )
         line_bot_api.reply_message(
             event.reply_token, TextSendMessage(text=message_text)
         )

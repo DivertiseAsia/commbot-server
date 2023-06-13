@@ -69,6 +69,19 @@ class TestLineViews(BaseTestCase):
         related_chat = Chat.objects.get(external_id="abc")
         self.assertEquals(related_chat.chat_type, Chat.ChatType.INDIVIDUAL)
 
+    @patch("external_data_manager.helpers.scryfall_search")
+    @patch("comm_manager.apis.line_bot_api.reply_message")
+    def test_user_messages_bot_first_time_creates_chat_if_none_exists_event_as_search(
+        self, mock, mock_scryfall
+    ):
+        mock_scryfall.return_value = None
+        self.assertEquals(0, Chat.objects.filter(external_id="abc").count())
+        event = self.given_message_event("[[msg]]", "abc")
+        handle_message(event)
+
+        related_chat = Chat.objects.get(external_id="abc")
+        self.assertEquals(related_chat.chat_type, Chat.ChatType.INDIVIDUAL)
+
     @patch("comm_manager.apis.line_bot_api.reply_message")
     def test_user_messages_bot_later_time_does_not_make_a_second(self, mock):
         self.assertEquals(0, Chat.objects.filter(external_id="abc").count())
