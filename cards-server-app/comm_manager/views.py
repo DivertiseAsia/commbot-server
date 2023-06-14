@@ -69,13 +69,9 @@ def handle_message(event):
     chat_id = event.source.user_id
     chat_type = Chat.ChatType.INDIVIDUAL
     if isinstance(event.source, SourceGroup):
-        logger.info("it's group chat")
         chat_id = event.source.group_id
         chat_type = Chat.ChatType.GROUP
-    else:
-        logger.info("it's individual chat")
     chat, _ = Chat.objects.get_or_create(external_id=chat_id, chat_type=chat_type)
-    logger.info("got chat", chat)
 
     message_text = event.message.text
     lookup_matches = LOOKUP_DATA_VIA_API.findall(message_text)
