@@ -64,7 +64,7 @@ LOOKUP_DATA_VIA_API = re.compile(
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     ## TODO: Fix this. It cannot assume it's a individual chat... causes bugs
-    logger.info(json.dumps(event))
+    logger.info(event)
     chat_id = event.source.user_id
     chat_type = Chat.ChatType.INDIVIDUAL
     if "group_id" in event.source and event.source.group_id:
