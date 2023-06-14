@@ -17,9 +17,12 @@ from linebot.models import (
     LeaveEvent,
 )
 import json
+import logging
 
 from comm_manager.models import Chat
 from comm_manager.apis import handler, line_bot_api
+
+logger = logging.getLogger("comm_views")
 
 
 class CommViewSet(viewsets.GenericViewSet):
@@ -61,17 +64,17 @@ LOOKUP_DATA_VIA_API = re.compile(
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     ## TODO: Fix this. It cannot assume it's a individual chat... causes bugs
-    print(json.dumps(event))
+    logger.info(json.dumps(event))
     chat_id = event.source.user_id
     chat_type = Chat.ChatType.INDIVIDUAL
     if "group_id" in event.source and event.source.group_id:
-        print("it's group chat")
+        logger.info("it's group chat")
         chat_id = event.source.group_id
         chat_type = Chat.ChatType.GROUP
     else:
-        print("it's individual chat")
+        logger.info("it's individual chat")
     chat, _ = Chat.objects.get_or_create(external_id=chat_id, chat_type=chat_type)
-    print("got chat", chat)
+    logger.info("got chat", chat)
 
     message_text = event.message.text
     lookup_matches = LOOKUP_DATA_VIA_API.findall(message_text)

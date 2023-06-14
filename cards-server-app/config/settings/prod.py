@@ -4,12 +4,12 @@ from .base import *
 logger = logging.getLogger("setting_warnings")
 
 # LOGGING
-LOGGING = {
-    "version": 1,
-    "loggers": {
-        "setting_warnings": {"level": "WARNING"},
-    },
-}
+# LOGGING = {
+#     "version": 1,
+#     "loggers": {
+#         "setting_warnings": {"level": "WARNING"},
+#     },
+# }
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
