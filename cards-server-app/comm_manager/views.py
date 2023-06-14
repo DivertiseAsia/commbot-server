@@ -15,6 +15,7 @@ from linebot.models import (
     UnfollowEvent,
     JoinEvent,
     LeaveEvent,
+    SourceGroup,
 )
 import json
 import logging
@@ -67,7 +68,7 @@ def handle_message(event):
     logger.info(event)
     chat_id = event.source.user_id
     chat_type = Chat.ChatType.INDIVIDUAL
-    if "group_id" in event.source and event.source.group_id:
+    if isinstance(event.source, SourceGroup):
         logger.info("it's group chat")
         chat_id = event.source.group_id
         chat_type = Chat.ChatType.GROUP

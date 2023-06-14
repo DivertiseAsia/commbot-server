@@ -7,8 +7,8 @@ from comm_manager.views import (
     handle_joinevent,
     handle_leaveevent,
 )
-from linebot.models import TextSendMessage
-from unittest.mock import patch, call, ANY
+from linebot.models import TextSendMessage, SourceGroup, SourceUser
+from unittest.mock import patch, call, ANY, MagicMock
 import time
 
 
@@ -17,31 +17,35 @@ class TestLineViews(BaseTestCase):
         super().setUp()
 
     def given_event_with_user_details_only(self, user_id):
-        from munch import DefaultMunch
-
-        undefined = object()
-        return DefaultMunch.fromDict({"source": {"user_id": user_id}}, undefined)
+        basic = MagicMock()
+        basic.source = SourceUser(user_id=user_id)
+        return basic
 
     def given_message_event(self, message, user_id):
         from munch import DefaultMunch
 
         undefined = object()
-        return DefaultMunch.fromDict(
-            {"message": {"text": message}, "source": {"user_id": user_id}},
+        munch = DefaultMunch.fromDict(
+            {
+                "message": {"text": message},
+            },
             undefined,
         )
+        munch.source = SourceUser(user_id=user_id)
+        return munch
 
     def given_message_event_in_group(self, message, user_id, group_id):
         from munch import DefaultMunch
 
         undefined = object()
-        return DefaultMunch.fromDict(
+        munch = DefaultMunch.fromDict(
             {
                 "message": {"text": message},
-                "source": {"user_id": user_id, "group_id": group_id},
             },
             undefined,
         )
+        munch.source = SourceGroup(user_id=user_id, group_id=group_id)
+        return munch
 
     def given_event_with_group_details(self, message, user_id, group_id):
         from munch import DefaultMunch
