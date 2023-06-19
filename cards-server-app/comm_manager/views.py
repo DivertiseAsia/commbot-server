@@ -28,6 +28,23 @@ logger = logging.getLogger("comm_views")
 
 class CommViewSet(viewsets.GenericViewSet):
     @action(
+        methods=["GET"],
+        detail=False,
+        url_path="test",
+    )
+    def test(self, request):
+        from playwright.sync_api import sync_playwright
+
+        with sync_playwright() as p:
+            browser = p.firefox.launch()
+            page = browser.new_page()
+            page.goto("https://cardkingdom.com")
+            title = page.title()
+            browser.close()
+            logger.info("title", title)
+            return Response(title, status=status.HTTP_200_OK)
+
+    @action(
         methods=["POST"],
         detail=False,
         url_path="webhook",
