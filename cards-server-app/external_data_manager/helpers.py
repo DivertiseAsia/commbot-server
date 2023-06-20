@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger("external_data_manager__helpers")
 
 
-def get_ckd_price_and_img(card):
+def get_ckd_price_and_img(card: str):
     try:
         with sync_playwright() as p:
             browser = p.firefox.launch()
@@ -67,7 +67,7 @@ def scryfall_search(query):
                 else:
                     card_obj.mana_cost = card["card_faces"][0]["mana_cost"]
                 card_obj.latest_card_data = card
-                ckd_price, ckd_image = get_ckd_price_and_img(card_obj.name)
+                ckd_price, ckd_image = get_ckd_price_and_img(card["name"])
                 card_obj.price_ckd = ckd_price
                 card_obj.image_url_ckd = ckd_image
                 card_obj.save()
