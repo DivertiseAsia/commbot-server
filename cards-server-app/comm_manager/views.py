@@ -106,7 +106,7 @@ def handle_message(event):
                 card_alts.append(card.name + " " + card.mana_cost)
                 card_images.append(
                     flex_json_card_image_with_price(
-                        card.image_url_ckd,
+                        card.image_url_ckd or card.image_url,
                         card.price_ckd,
                         card.url_ckd_search,
                     )
