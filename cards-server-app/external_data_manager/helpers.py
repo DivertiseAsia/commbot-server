@@ -17,7 +17,7 @@ def get_ckd_price_and_img(card: str):
 
             card = page.locator(".productCardWrapper").filter(has_text=card).nth(0)
             card_price = card.locator(".NM span.stylePrice").inner_text().strip()
-            card_image = card.locator("img").get_attribute("src")
+            card_image = card.locator("img.card-image").get_attribute("src")
             return (card_price, card_image)
     except Exception as e:
         logger.warning("Issue with ckd price and image", e)
