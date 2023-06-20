@@ -86,11 +86,6 @@ def flex_json_card_image_with_price(image, price, url):
                         "angle": "90deg",
                     },
                     "width": "50%",
-                    "action": {
-                        "type": "uri",
-                        "label": "View on CKD",
-                        "uri": url,
-                    },
                 },
             ],
             "paddingAll": "0px",
