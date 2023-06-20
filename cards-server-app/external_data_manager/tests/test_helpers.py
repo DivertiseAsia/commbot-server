@@ -30,8 +30,15 @@ class TestScryfallPull(BaseTestCase):
     def test_scryfall_throws_419_it_returns_none(self):
         self.assertEquals(None, scryfall_search("419 going to occur"))
 
+    @patch("external_data_manager.helpers.get_ckd_price_and_img")
     @patch("requests.get", MagicMock(return_value=response_200_munch))
-    def test_scryfall_search_saves_first_card(self):
+    def test_scryfall_search_saves_first_card(self, mock_get_ckd_price_and_img):
+        expected_price_ckd = "$20.00"
+        expected_image_url_ckd = "newckdurl"
+        mock_get_ckd_price_and_img.return_value = (
+            expected_price_ckd,
+            expected_image_url_ckd,
+        )
         current_cards = MtgCard.objects.all().count()
         expected_image_uri = "https://image-uri.png"
         expected_price = "$45.99"
@@ -112,10 +119,17 @@ class TestScryfallPull(BaseTestCase):
         assert not mock_request.called
         self.assertEquals(existing_card, returned_card)
 
+    @patch("external_data_manager.helpers.get_ckd_price_and_img")
     @patch("requests.get")
     def test_scryfall_item_is_cached_over_24_hours_it_replaces_cache(
-        self, mock_request
+        self, mock_request, mock_get_ckd_price_and_img
     ):
+        expected_price_ckd = "$20.00"
+        expected_image_url_ckd = "newckdurl"
+        mock_get_ckd_price_and_img.return_value = (
+            expected_price_ckd,
+            expected_image_url_ckd,
+        )
         mock_request.return_value = response_200_munch
         expected_name = "new name"
         expected_image_uri = "https://image-uri.png"
@@ -142,7 +156,12 @@ class TestScryfallPull(BaseTestCase):
         }
         response_200_munch.json.return_value = expected_data
 
-        existing_card = MtgCard.objects.create(name="test_cache", search_text="abc")
+        existing_card = MtgCard.objects.create(
+            name="test_cache",
+            search_text="abc",
+            price_ckd="$30",
+            image_url_ckd="oldckdimage",
+        )
         initial_card_count = MtgCard.objects.all().count()
         original_created = existing_card.created
         right_before_cache_expiry = existing_card.last_updated - timedelta(
@@ -155,6 +174,7 @@ class TestScryfallPull(BaseTestCase):
         returned_card = scryfall_search("abc")
 
         assert not mock_request.called
+        assert not mock_get_ckd_price_and_img.called
         self.assertEquals(right_before_cache_expiry, returned_card.last_updated)
 
         right_at_cache_expiry = existing_card.last_updated - timedelta(
@@ -180,9 +200,15 @@ class TestScryfallPull(BaseTestCase):
         self.assertEquals(
             expected_data["data"][0], second_returned_card.latest_card_data
         )
+        self.assertEquals(expected_price_ckd, second_returned_card.price_ckd)
+        self.assertEquals(expected_image_url_ckd, second_returned_card.image_url_ckd)
 
+    @patch("external_data_manager.helpers.get_ckd_price_and_img")
     @patch("requests.get", MagicMock(return_value=response_200_munch))
-    def test_scryfall_get_card_image_from_front_face_or_first_image(self):
+    def test_scryfall_get_card_image_from_front_face_or_first_image(
+        self, mock_get_ckd_price_and_img
+    ):
+        mock_get_ckd_price_and_img.return_value = ("", "")
         current_cards = MtgCard.objects.all().count()
         expected_image_uri = "https://image-uri.png"
         expected_price = "$45.99"
@@ -226,8 +252,12 @@ class TestScryfallPull(BaseTestCase):
 
         self.assertEquals(current_cards + 1, MtgCard.objects.all().count())
 
+    @patch("external_data_manager.helpers.get_ckd_price_and_img")
     @patch("requests.get", MagicMock(return_value=response_200_munch))
-    def test_scryfall_get_manacost_from_front_face_or_main(self):
+    def test_scryfall_get_manacost_from_front_face_or_main(
+        self, mock_get_ckd_price_and_img
+    ):
+        mock_get_ckd_price_and_img.return_value = ("", "")
         current_cards = MtgCard.objects.all().count()
         expected_image_uri = "https://image-uri.png"
         expected_price = "$45.99"

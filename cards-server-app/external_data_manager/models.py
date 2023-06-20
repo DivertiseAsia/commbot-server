@@ -12,7 +12,9 @@ class MtgCard(models.Model):
     latest_card_data = models.JSONField(default=dict, blank=True)
 
     image_url = models.CharField(max_length=255)
+    image_url_ckd = models.CharField(max_length=255, blank=True, null=True)
     price = models.CharField(max_length=20, blank=True, null=True)
+    price_ckd = models.CharField(max_length=20, blank=True, null=True)
     type_line = models.CharField(max_length=255)
     mana_cost = models.CharField(max_length=64)
 
@@ -20,6 +22,14 @@ class MtgCard(models.Model):
     external_id = models.CharField(
         _("External ID (from Provider)"), max_length=255, blank=True, db_index=True
     )
+
+    @staticmethod
+    def get_url_ckd_search(card_name):
+        return f"https://www.cardkingdom.com/catalog/search?search=header&filter%5Bname%5D=%22{card_name}%22&filter%5Bcategory_id%5D=0&filter%5Btype_mode%5D=any&filter%5Btype%5D%5B0%5D=any&filter%5Bprice_op%5D=&filter%5Bprice%5D=&filter%5Bprice_max%5D=&filter%5Bfoil%5D=1&filter%5Bnonfoil%5D=1&filter%5Bsort%5D=name&filter%5Bsort_dir%5D"
+
+    @property
+    def url_ckd_search(self):
+        return self.__class__.get_url_ckd_search(self.name)
 
     def save(self, *args, **kwargs):
         self.search_text = " ".join(self.search_text.split()).lower()

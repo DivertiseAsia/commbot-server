@@ -2,18 +2,26 @@ import requests
 from external_data_manager.models import MtgCard
 from datetime import timedelta
 from django.utils import timezone
+from playwright.sync_api import sync_playwright
+import logging
+
+logger = logging.getLogger("external_data_manager__helpers")
 
 
-def scryfall_first_card(cards):
-    return cards[0]
+def get_ckd_price_and_img(card):
+    try:
+        with sync_playwright() as p:
+            browser = p.firefox.launch()
+            page = browser.new_page()
+            page.goto(MtgCard.url_ckd_search(card))
 
-
-def scryfall_card_image(card):
-    return card["image_uris"]["normal"]
-
-
-def scryfall_card_price(card):
-    return card["prices"]["usd"]
+            card = page.locator(".productCardWrapper").filter(has_text=card).nth(0)
+            card_price = card.locator(".NM span.stylePrice").inner_text().strip()
+            card_image = card.locator("img").get_attribute("src")
+            return (card_price, card_image)
+    except Exception as e:
+        logger.warning("Issue with ckd price and image", e)
+        return ("", "")
 
 
 def scryfall_search(query):
@@ -59,6 +67,9 @@ def scryfall_search(query):
                 else:
                     card_obj.mana_cost = card["card_faces"][0]["mana_cost"]
                 card_obj.latest_card_data = card
+                ckd_price, ckd_image = get_ckd_price_and_img(card_obj.name)
+                card_obj.price_ckd = ckd_price
+                card_obj.image_url_ckd = ckd_image
                 card_obj.save()
                 return card_obj
         else:

@@ -2,7 +2,7 @@ def carousel(items):
     return {"type": "carousel", "contents": items}
 
 
-def flex_json_card_image_with_price(image, price):
+def flex_json_card_image_with_price(image, price, url):
     return {
         "type": "bubble",
         "body": {
@@ -48,7 +48,7 @@ def flex_json_card_image_with_price(image, price):
                                     "contents": [
                                         {
                                             "type": "text",
-                                            "text": "Pricing",
+                                            "text": "CKD 🔗",
                                             "size": "lg",
                                             "color": "#ffffff",
                                             "align": "end",
@@ -86,6 +86,11 @@ def flex_json_card_image_with_price(image, price):
                         "angle": "90deg",
                     },
                     "width": "50%",
+                    "action": {
+                        "type": "uri",
+                        "label": "action",
+                        "uri": url,
+                    },
                 },
             ],
             "paddingAll": "0px",
