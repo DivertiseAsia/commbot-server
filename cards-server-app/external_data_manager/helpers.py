@@ -13,7 +13,7 @@ def get_ckd_price_and_img(card: str):
         with sync_playwright() as p:
             browser = p.firefox.launch()
             page = browser.new_page()
-            page.goto(MtgCard.url_ckd_search(card))
+            page.goto(MtgCard.get_url_ckd_search(card))
 
             card = page.locator(".productCardWrapper").filter(has_text=card).nth(0)
             card_price = card.locator(".NM span.stylePrice").inner_text().strip()
