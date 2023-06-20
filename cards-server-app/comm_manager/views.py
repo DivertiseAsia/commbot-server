@@ -112,6 +112,7 @@ def handle_message(event):
                     )
                 )
             time.sleep(0.2)
+        logger.info("card_json", card_images)
         line_bot_api.reply_message(
             event.reply_token,
             FlexSendMessage(

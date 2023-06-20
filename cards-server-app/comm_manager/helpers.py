@@ -88,7 +88,7 @@ def flex_json_card_image_with_price(image, price, url):
                     "width": "50%",
                     "action": {
                         "type": "uri",
-                        "label": "action",
+                        "label": "View on CKD",
                         "uri": url,
                     },
                 },
