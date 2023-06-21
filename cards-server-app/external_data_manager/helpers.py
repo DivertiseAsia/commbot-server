@@ -16,7 +16,12 @@ def get_ckd_price_and_img(card: str):
             page.goto(MtgCard.get_url_ckd_search(card))
 
             card = page.locator(".productCardWrapper").filter(has_text=card).nth(0)
-            card_price = card.locator(".NM span.stylePrice").inner_text().strip()
+            card_price = (
+                card.locator(".NM span.stylePrice")
+                .inner_text()
+                .strip()
+                .replace("$", "")
+            )
             card_image = card.locator("img.card-image").get_attribute("src")
             return (card_price, card_image)
     except Exception as e:
