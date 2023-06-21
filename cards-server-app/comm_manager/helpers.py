@@ -89,5 +89,6 @@ def flex_json_card_image_with_price(image, price, url):
                 },
             ],
             "paddingAll": "0px",
+            "action": {"type": "uri", "label": "action", "uri": "https://google.com/"},
         },
     }
