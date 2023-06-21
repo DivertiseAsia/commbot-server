@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from django.utils import timezone
 import re
 import time
+from urllib.parse import unquote
 
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (
@@ -108,7 +109,7 @@ def handle_message(event):
                     flex_json_card_image_with_price(
                         card.image_url_ckd or card.image_url,
                         card.price_ckd,
-                        card.url_ckd_search,
+                        unquote(card.url_ckd_search),
                     )
                 )
             time.sleep(0.2)
