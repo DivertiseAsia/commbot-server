@@ -23,7 +23,7 @@ from rest_framework import routers
 
 from demo_manager.urls import urlpatterns as demo_manager_urls
 from user_manager.views import AuthViewSetV1, ProfileViewSetV1
-from comm_manager.views import CommViewSet
+from comm_manager.urls import urlpatterns as comm_manager_urls
 
 
 def trigger_error(request):
@@ -41,7 +41,6 @@ api_v1 = get_schema_view(
 router_v1 = routers.DefaultRouter()
 router_v1.register(r"auth", AuthViewSetV1, basename="auth")
 router_v1.register(r"profile", ProfileViewSetV1, basename="profile")
-router_v1.register(r"comm", CommViewSet, basename="comm")
 
 urlpatterns = (
     [
@@ -70,6 +69,7 @@ urlpatterns = (
         path("__debug__/", include("debug_toolbar.urls")),
         path("_pictures/", include("pictures.urls")),  # for django-pictures library
     ]
-    + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    + comm_manager_urls
     + demo_manager_urls
+    + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 )  # for demo_manager can remove
