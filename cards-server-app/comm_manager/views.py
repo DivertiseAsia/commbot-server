@@ -45,11 +45,13 @@ class CommViewSet(viewsets.GenericViewSet):
                         TextSendMessage(text=form.cleaned_data["contents"]),
                     )
                 else:
+                    message_contents = form.cleaned_data["contents"]
+                    logger.info("form contents", message_contents)
                     line_bot_api.push_message(
                         instance.external_id,
                         FlexSendMessage(
                             alt_text=form.cleaned_data["alt_text"],
-                            contents=form.cleaned_data["contents"],
+                            contents=message_contents,
                         ),
                     )
 
