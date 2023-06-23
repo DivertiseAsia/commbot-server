@@ -39,21 +39,19 @@ class CommViewSet(viewsets.GenericViewSet):
             if form.is_valid():
                 # Process the form data
                 mt = form.cleaned_data["message_type"]
+                message = TextSendMessage(
+                    text="unhandled message type attempted to send"
+                )
                 if mt == "text":
-                    line_bot_api.push_message(
-                        instance.external_id,
-                        TextSendMessage(text=form.cleaned_data["contents"]),
-                    )
-                else:
+                    message = TextSendMessage(text=form.cleaned_data["contents"])
+                elif mt == "flex":
                     message_contents = form.cleaned_data["contents"]
-                    logger.info("form contents", message_contents)
-                    line_bot_api.push_message(
-                        instance.external_id,
-                        FlexSendMessage(
-                            alt_text=form.cleaned_data["alt_text"],
-                            contents=message_contents,
-                        ),
+                    logger.warning("form contents", message_contents)
+                    message = FlexSendMessage(
+                        alt_text=form.cleaned_data["alt_text"],
+                        contents=message_contents,
                     )
+                line_bot_api.push_message(instance.external_id, message)
 
         context = {
             "form": form,
