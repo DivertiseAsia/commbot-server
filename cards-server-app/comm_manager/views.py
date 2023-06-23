@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.contrib.sites.models import Site
+from urllib.parse import quote
 
 import re
 import time
@@ -152,7 +153,7 @@ def handle_message(event):
                 card_alts.append(card.name + " " + card.mana_cost)
                 relative_url = reverse("comm_manager:cvs-mtg-ckd-redirect")
                 domain = Site.objects.get_current().domain
-                full_url = f"https://{domain}{relative_url}?search={card.name}"
+                full_url = f"https://{domain}{relative_url}?search={quote(card.name)}"
 
                 card_images.append(
                     flex_json_card_image_with_price(
