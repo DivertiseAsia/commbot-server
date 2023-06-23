@@ -45,7 +45,7 @@ class CommViewSet(viewsets.GenericViewSet):
                 if mt == "text":
                     message = TextSendMessage(text=form.cleaned_data["contents"])
                 elif mt == "flex":
-                    message_contents = json.dumps(form.cleaned_data["contents"])
+                    message_contents = json.loads(form.cleaned_data["contents"])
                     logger.warning("form contents", message_contents)
                     logger.warning("form contents type", type(message_contents))
                     message = FlexSendMessage(
