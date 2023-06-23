@@ -1,0 +1,9 @@
+{% extends 'admin/change_form.html' %}
+{% block object-tools-items %}
+    <li>
+      <a style="background: #417790;" href="{% url 'comm_manager:cvs-custom-form-view' original.pk %}">
+        Push Message
+      </a>
+    </li>
+{{ block.super }}
+{% endblock %}

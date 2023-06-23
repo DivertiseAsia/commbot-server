@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils import timezone
+from django.shortcuts import render, get_object_or_404
 import re
 import time
 from urllib.parse import unquote
@@ -23,11 +24,44 @@ import logging
 
 from comm_manager.models import Chat
 from comm_manager.apis import handler, line_bot_api
+from comm_manager.forms import PushMessageForm
 
 logger = logging.getLogger("comm_views")
 
 
 class CommViewSet(viewsets.GenericViewSet):
+    @action(detail=True, methods=["GET", "POST"], url_path="custom-form-view")
+    def custom_form_view(self, request, pk=None):
+        instance = get_object_or_404(Chat, id=pk)
+        form = PushMessageForm()
+        if request.method == "POST":
+            form = PushMessageForm(request.POST)
+            if form.is_valid():
+                # Process the form data
+                mt = form.cleaned_data["message_type"]
+                if mt == "text":
+                    line_bot_api.push_message(
+                        instance.external_id,
+                        TextSendMessage(text=form.cleaned_data["contents"]),
+                    )
+                else:
+                    line_bot_api.push_message(
+                        instance.external_id,
+                        FlexSendMessage(
+                            alt_text=form.cleaned_data["alt_text"],
+                            contents=form.cleaned_data["contents"],
+                        ),
+                    )
+
+        context = {
+            "form": form,
+            "instance": instance,
+        }
+
+        return render(
+            request, "admin/comm_manager/chat/send_push_message_form.html", context
+        )
+
     @action(
         methods=["GET"],
         detail=False,
