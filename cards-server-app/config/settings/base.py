@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "django.contrib.sites",
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework.authtoken",
@@ -148,6 +149,8 @@ LOGIN_URL = "rest_framework:login"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_URL = "rest_framework:logout"
 LOGOUT_REDIRECT_URL = "/admin"
+
+SITE_ID = 1
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/

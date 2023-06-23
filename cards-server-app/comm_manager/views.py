@@ -2,10 +2,12 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils import timezone
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
+from django.contrib.sites.models import Site
+
 import re
 import time
-from urllib.parse import unquote
 
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (
@@ -30,6 +32,14 @@ logger = logging.getLogger("comm_views")
 
 
 class CommViewSet(viewsets.GenericViewSet):
+    @action(detail=False, methods=["get"], url_path="mtg-ckd-redirect")
+    def mtg_ckd_redirect(self, request):
+        from external_data_manager.models import MtgCard
+
+        search = request.GET.get("search") or "Unknown Shores"
+
+        return redirect(MtgCard.get_url_ckd_search(search))
+
     @action(detail=True, methods=["GET", "POST"], url_path="custom-form-view")
     def custom_form_view(self, request, pk=None):
         instance = get_object_or_404(Chat, id=pk)
@@ -140,13 +150,15 @@ def handle_message(event):
             card = scryfall_search(match)
             if card:
                 card_alts.append(card.name + " " + card.mana_cost)
-                logger.warning("search url:", unquote(card.url_ckd_search))
-                logger.warning(unquote(card.url_ckd_search))
+                relative_url = reverse("comm_manager:cvs-mtg-ckd-redirect")
+                domain = Site.objects.get_current().domain
+                full_url = f"https://{domain}{relative_url}?search={card.name}"
+
                 card_images.append(
                     flex_json_card_image_with_price(
                         card.image_url_ckd or card.image_url,
                         card.price_ckd,
-                        unquote(card.url_ckd_search),
+                        full_url,
                     )
                 )
             time.sleep(0.2)
