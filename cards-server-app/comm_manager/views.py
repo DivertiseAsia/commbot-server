@@ -47,6 +47,7 @@ class CommViewSet(viewsets.GenericViewSet):
                 elif mt == "flex":
                     message_contents = form.cleaned_data["contents"]
                     logger.warning("form contents", message_contents)
+                    logger.warning("form contents type", type(message_contents))
                     message = FlexSendMessage(
                         alt_text=form.cleaned_data["alt_text"],
                         contents=message_contents,
