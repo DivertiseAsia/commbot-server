@@ -140,6 +140,8 @@ def handle_message(event):
             card = scryfall_search(match)
             if card:
                 card_alts.append(card.name + " " + card.mana_cost)
+                logger.warning("search url:", unquote(card.url_ckd_search))
+                logger.warning(unquote(card.url_ckd_search))
                 card_images.append(
                     flex_json_card_image_with_price(
                         card.image_url_ckd or card.image_url,
