@@ -3,6 +3,31 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
+class MtgStore(models.Model):
+    name = models.CharField(max_length=100)
+    search_url = models.CharField(max_length=255)
+    item_locator = models.CharField(max_length=100)
+    item_price_locator = models.CharField(max_length=100)
+    item_name_locator = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+
+class AdditionalStep(models.Model):
+    class Action(models.IntegerChoices):
+        FILL = 1
+        CLICK = 2
+
+    order = models.IntegerField()
+    item_locator = models.CharField(max_length=100)
+    action = models.IntegerField(choices=Action.choices)
+    store = models.ForeignKey(MtgStore, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("order", "store")
+
+
 class MtgCard(models.Model):
     ##TODO: create task server to grab updates from time to time.
     ##TODO: see if can grab prices from ckd; links to sabai/fizzy
@@ -22,6 +47,7 @@ class MtgCard(models.Model):
     external_id = models.CharField(
         _("External ID (from Provider)"), max_length=255, blank=True, db_index=True
     )
+    prices = models.ManyToManyField(MtgStore, through="MtgStorePrice")
 
     @staticmethod
     def get_url_ckd_search(card_name):
@@ -34,3 +60,10 @@ class MtgCard(models.Model):
     def save(self, *args, **kwargs):
         self.search_text = " ".join(self.search_text.split()).lower()
         super(MtgCard, self).save(*args, **kwargs)
+
+
+class MtgStorePrice(models.Model):
+    store = models.ForeignKey(MtgStore, on_delete=models.CASCADE)
+    card = models.ForeignKey(MtgCard, on_delete=models.CASCADE)
+    price = models.CharField(max_length=20, blank=True, null=True)
+    last_updated = models.DateTimeField(_("Last Updated"), auto_now=True)
