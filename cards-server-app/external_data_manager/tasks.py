@@ -8,6 +8,9 @@ from playwright.sync_api import sync_playwright
 from celery import shared_task
 import re
 from decimal import Decimal, getcontext
+import logging
+
+logger = logging.getLogger("external_data_manager__tasks")
 
 
 def get_prices_for_card(card: MtgCard):
@@ -22,7 +25,7 @@ def get_prices_for_card(card: MtgCard):
         browser = p.firefox.launch()
         page = browser.new_page()
         for x in stores:
-            print(f"looking up {x[0].name}")
+            logger.info(f"looking up {x[0].name}")
             url_to_open = x[0].search_url.replace("{card}", card.name)
             page.goto(url_to_open)
             page.screenshot(path=x[0].name + "list.png")
@@ -60,7 +63,10 @@ def update_prices_for_card(card_id: int):
 
     for store in prices:
         matching_data = [item for item in store[2] if _name_matches(card.name, item[0])]
-        lowest_price = min(matching_data, key=lambda x: Decimal(x[1]))
-        MtgStorePrice.objects.update_or_create(
-            store=store[0], card=card, defaults={"price": Decimal(lowest_price[1])}
-        )
+        if len(matching_data) > 0:
+            lowest_price = min(matching_data, key=lambda x: Decimal(x[1]))
+            MtgStorePrice.objects.update_or_create(
+                store=store[0], card=card, defaults={"price": Decimal(lowest_price[1])}
+            )
+        else:
+            logger.info(f"No viable result for store {store[0].name} for {card.name}")

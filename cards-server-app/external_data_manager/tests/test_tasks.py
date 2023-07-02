@@ -153,3 +153,31 @@ class TestUpdatePrices(BaseTestCase):
             Decimal("10.00"),
             MtgStorePrice.objects.get(card=self.test_card, store=self.store_b).price,
         )
+
+    @patch("external_data_manager.tasks.get_prices_for_card")
+    def test_update_prices_no_results_doesnt_explode(self, mock_get_prices):
+        mock_prices = []
+        mock_prices.append(
+            (
+                self.store_a,
+                [],
+                [],
+            )
+        )
+        mock_prices.append(
+            (
+                self.store_b,
+                [],
+                [
+                    ("fail " + self.card_name, "1.25"),
+                    (self.card_name + " (test)", "10.00"),
+                ],
+            )
+        )
+        mock_get_prices.return_value = list(mock_prices)
+
+        update_prices_for_card(self.test_card.pk)
+
+        self.assertEquals(
+            MtgStorePrice.objects.all().count(), self.initial_price_objects + 1
+        )
