@@ -47,6 +47,9 @@ def get_prices_for_card(card: MtgCard):
 
 
 def _name_matches(to_match, value):
+    value = value.lower()
+    to_match = to_match.strip().lower()
+
     # Remove text after " - "
     value = re.sub(r"\s-\s.*", "", value)
 
@@ -56,7 +59,8 @@ def _name_matches(to_match, value):
     # Remove text inside square brackets
     value = re.sub(r"\[.*?\]", "", value)
 
-    return value.strip() == to_match.strip()
+    value = value.strip()
+    return value == to_match
 
 
 @shared_task

@@ -123,7 +123,7 @@ class TestUpdatePrices(BaseTestCase):
                 self.store_a,
                 [],
                 [
-                    (self.card_name + " - foil", "1.00"),
+                    (self.card_name.lower() + " - foil", "1.00"),
                     ("TEST" + self.card_name, "0.01"),
                 ],
             )
