@@ -53,6 +53,9 @@ def _name_matches(to_match, value):
     # Remove text inside parentheses
     value = re.sub(r"\([^()]*\)", "", value)
 
+    # Remove text inside square brackets
+    value = re.sub(r"\[.*?\]", "", value)
+
     return value.strip() == to_match.strip()
 
 

@@ -134,7 +134,7 @@ class TestUpdatePrices(BaseTestCase):
                 [],
                 [
                     ("fail " + self.card_name, "1.25"),
-                    (self.card_name + " (test)", "10.00"),
+                    (self.card_name + " (test) [extra]", "10.00"),
                 ],
             )
         )
