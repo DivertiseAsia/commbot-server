@@ -9,6 +9,7 @@ from external_data_manager.models import (
     AdditionalStep,
 )
 from .helpers import update_query_from_scryfall
+from .tasks import update_prices_for_card
 
 
 class MtgCardPriceInline(admin.TabularInline):
@@ -17,7 +18,7 @@ class MtgCardPriceInline(admin.TabularInline):
 
 
 class MtgCardAdminView(ImportExportModelAdmin):
-    actions = ["refresh_data"]
+    actions = ["refresh_data", "update_prices"]
     model = MtgCard
     list_display = (
         "name",
@@ -33,6 +34,15 @@ class MtgCardAdminView(ImportExportModelAdmin):
     def refresh_data(self, request, queryset):
         for obj in queryset:
             update_query_from_scryfall(obj.search_text)
+
+    def update_prices(self, request, queryset):
+        for obj in queryset:
+            update_prices_for_card.delay(obj.pk)
+
+        self.message_user(
+            request,
+            "Updating selected card prices",
+        )
 
 
 class AdditionalStepInline(admin.TabularInline):

@@ -65,5 +65,5 @@ class MtgCard(models.Model):
 class MtgStorePrice(models.Model):
     store = models.ForeignKey(MtgStore, on_delete=models.CASCADE)
     card = models.ForeignKey(MtgCard, on_delete=models.CASCADE)
-    price = models.CharField(max_length=20, blank=True, null=True)
+    price = models.DecimalField(max_digits=13, decimal_places=2)
     last_updated = models.DateTimeField(_("Last Updated"), auto_now=True)

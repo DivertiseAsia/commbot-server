@@ -209,6 +209,14 @@ FILE_UPLOAD_HANDLERS = [
     "django.core.files.uploadhandler.TemporaryFileUploadHandler",
 ]
 
+# Celery settings
+CELERY_BROKER_URL = os.environ.get(
+    "REDISCLOUD_URL", default="NOT_SET_CELERY_BROKER_URL"
+)
+CELERY_RESULT_BACKEND = os.environ.get(
+    "REDISCLOUD_URL", default="NOT_SET_CELERY_RESULT_BACKEND"
+)
+
 
 def get_database_dict():
     import re

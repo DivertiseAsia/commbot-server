@@ -1,2 +1,3 @@
 release: ./release.sh
 web: ./start-heroku.sh
+worker: celery -A commbot_celery worker -l INFO
