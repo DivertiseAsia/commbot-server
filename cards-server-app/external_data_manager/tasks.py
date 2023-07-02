@@ -24,9 +24,11 @@ def get_prices_for_card(card: MtgCard):
     with sync_playwright() as p:
         browser = p.firefox.launch()
         page = browser.new_page()
+        logger.info(f"Successfully opened browser to get prices for {card.name}")
         for x in stores:
             logger.info(f"looking up {x[0].name}")
             url_to_open = x[0].search_url.replace("{card}", card.name)
+            logger.info(f"Loaded browser")
             page.goto(url_to_open)
             page.screenshot(path=x[0].name + "list.png")
             if x[1]:
@@ -40,7 +42,7 @@ def get_prices_for_card(card: MtgCard):
                 price = pl.locator(x[0].item_price_locator).inner_text()
                 price_numeric = re.sub(r"[^0-9.]", "", price)
                 x[2].append(card_name, price_numeric)
-
+            logger.info(f"Got {len(x[2])} results for {x[0].name} @ {x[0].name}")
         browser.close()
     return stores
 
