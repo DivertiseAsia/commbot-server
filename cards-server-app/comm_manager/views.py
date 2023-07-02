@@ -162,6 +162,10 @@ def handle_message(event):
                         full_url,
                     )
                 )
+                if "pricing" in message_text.lower() or "price" in message_text.lower():
+                    from external_data_manager.tasks import update_prices_for_card
+
+                    update_prices_for_card.delay(card.pk, chat_id=chat_id)
             time.sleep(0.2)
         logger.info("card_json", card_images)
         line_bot_api.reply_message(

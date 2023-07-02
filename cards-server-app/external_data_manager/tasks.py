@@ -64,17 +64,32 @@ def _name_matches(to_match, value):
 
 
 @shared_task
-def update_prices_for_card(card_id: int):
+def update_prices_for_card(card_id: int, chat_id=None):
     card = MtgCard.objects.get(pk=card_id)
     prices = get_prices_for_card(card)
     getcontext().prec = 2
 
+    price_objects = []
     for store in prices:
         matching_data = [item for item in store[2] if _name_matches(card.name, item[0])]
         if len(matching_data) > 0:
             lowest_price = min(matching_data, key=lambda x: Decimal(x[1]))
-            MtgStorePrice.objects.update_or_create(
+            price_obj, _ = MtgStorePrice.objects.update_or_create(
                 store=store[0], card=card, defaults={"price": Decimal(lowest_price[1])}
             )
+            price_objects.append(price_obj)
         else:
             logger.info(f"No viable result for store {store[0].name} for {card.name}")
+
+    if chat_id is not None:
+        from comm_manager.apis import line_bot_api
+        from linebot.models import TextSendMessage
+
+        message = f"Here is the pricing for {card.name}"
+        if len(price_objects) == 0:
+            message = f"Had trouble finding pricing for {card.name}"
+        else:
+            for p in price_objects:
+                message += f"\n{p.store.name} @ {p.price}"
+
+        line_bot_api.push_message(chat_id, TextSendMessage(text=message))

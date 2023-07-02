@@ -5,6 +5,7 @@ from munch import DefaultMunch
 from external_data_manager.tasks import update_prices_for_card
 from decimal import Decimal
 import time
+from linebot.models import TextSendMessage
 
 undefined = object()
 response_419_munch = DefaultMunch.fromDict(
@@ -180,4 +181,59 @@ class TestUpdatePrices(BaseTestCase):
 
         self.assertEquals(
             MtgStorePrice.objects.all().count(), self.initial_price_objects + 1
+        )
+
+    @patch("comm_manager.apis.line_bot_api.push_message")
+    @patch("external_data_manager.tasks.get_prices_for_card")
+    def test_update_prices_will_send_message_with_prices_with_results_and_has_chat_id(
+        self, mock_get_prices, mock_push
+    ):
+        mock_prices = []
+        mock_prices.append(
+            (
+                self.store_a,
+                [],
+                [(self.card_name + " (test)", "9.00")],
+            )
+        )
+        mock_prices.append(
+            (
+                self.store_b,
+                [],
+                [
+                    (self.card_name + " (test)", "10.00"),
+                ],
+            )
+        )
+        mock_get_prices.return_value = list(mock_prices)
+
+        update_prices_for_card(self.test_card.pk, chat_id="1")
+
+        mock_push.assert_called_once_with(
+            "1",
+            TextSendMessage(
+                text="Here is the pricing for Test Card\nstore_a @ 9.00\nstore_b @ 10.00"
+            ),
+        )
+
+    @patch("comm_manager.apis.line_bot_api.push_message")
+    @patch("external_data_manager.tasks.get_prices_for_card")
+    def test_update_prices_will_send_message_with_error_if_no_prices_and_has_chat_id(
+        self, mock_get_prices, mock_push
+    ):
+        mock_prices = []
+        mock_prices.append(
+            (
+                self.store_a,
+                [],
+                [],
+            )
+        )
+        mock_get_prices.return_value = list(mock_prices)
+
+        update_prices_for_card(self.test_card.pk, chat_id="1")
+
+        mock_push.assert_called_once_with(
+            "1",
+            TextSendMessage(text="Had trouble finding pricing for Test Card"),
         )
