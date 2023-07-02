@@ -28,9 +28,8 @@ def get_prices_for_card(card: MtgCard):
         for x in stores:
             logger.info(f"looking up {x[0].name}")
             url_to_open = x[0].search_url.replace("{card}", card.name)
-            logger.info(f"Loaded browser")
             page.goto(url_to_open)
-            page.screenshot(path=x[0].name + "list.png")
+            logger.info(f"Loaded browser")
             if x[1]:
                 for y in x[1]:
                     if y.action == AdditionalStep.Action.CLICK:
@@ -41,8 +40,8 @@ def get_prices_for_card(card: MtgCard):
                 card_name = pl.locator(x[0].item_name_locator).inner_text()
                 price = pl.locator(x[0].item_price_locator).inner_text()
                 price_numeric = re.sub(r"[^0-9.]", "", price)
-                x[2].append(card_name, price_numeric)
-            logger.info(f"Got {len(x[2])} results for {x[0].name} @ {x[0].name}")
+                x[2].append((card_name, price_numeric))
+            logger.info(f"Got {len(x[2])} results for {card.name} @ {x[0].name}")
         browser.close()
     return stores
 
