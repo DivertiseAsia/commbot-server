@@ -31,3 +31,20 @@ services:
     depends_on:
       - db
       - mailcatcher
+  redis:
+    image: redis:6.2-alpine
+    ports:
+      - '6379:6379'
+  celery:
+    build: 
+      context: ./cards-server-app
+    command: [ "./start-celery.sh" ]
+    volumes:
+      - ./cards-server-app:/usr/src/app
+    depends_on:
+      - web
+      - redis
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.dev
+      - PYTHONUNBUFFERED=1
+      - SECRET_KEY=whatever-secret-key

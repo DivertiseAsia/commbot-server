@@ -31,14 +31,7 @@ if DEBUG:
 
 SUPER_ADMIN_PASS = "cfb1234567q"
 
-LOGGING = {
-    "version": 1,
-    "loggers": {
-        "django.db.backends": {
-            "level": "DEBUG"
-        }
-    }
-}
+LOGGING = {"version": 1, "loggers": {"django.db.backends": {"level": "DEBUG"}}}
 
 # for django-debug-toolbar
 if DEBUG:
@@ -64,3 +57,6 @@ PICTURES = {
     "FILE_TYPES": ["WEBP"],
     "PIXEL_DENSITIES": [1],
 }
+
+CELERY_BROKER_URL = "redis://redis:6379"
+CELERY_RESULT_BACKEND = "redis://redis:6379"

@@ -1,5 +1,21 @@
 # Deployment Setup
 
+## Celery Locally
+
+Note it doesn't seem to refresh properly at the moment and may need to reboot it if you change code
+
+## Playwright issues
+
+PLAYWRIGHT_BUILDPACK_BROWSERS = firefox chromium
+
+You have to install chromium as firefox is missing dependencies.
+
+If it fails to run locally
+
+`echo "deb http://ftp.us.debian.org/debian buster main non-free" >> /etc/apt/sources.list.d/fonts.list`
+
+This seems to fix it. See: https://github.com/microsoft/playwright/issues/13530
+
 ## Required Environment Dependent Variables
 
 1. AWS_LOGS_GROUP
@@ -29,12 +45,12 @@
 6. REPOSITORY_URL
 
 ## Django Required Setting Variables
+
 On production these setting variables should not be `[""]` or `["*"]`
 for security reason
 
 1. [ALLOWED_HOSTS](https://docs.djangoproject.com/en/4.1/ref/settings/#allowed-hosts)
 2. [CORS_ALLOWED_ORIGINS or CORS_ALLOWED_ORIGIN_REGEXES](https://github.com/adamchainz/django-cors-headers#configuration)
-
 
 # AWS Environment Setup
 
@@ -100,54 +116,63 @@ for security reason
    3. Allow all ports from load balancer to ecs group
 10. Add Route53 A Record for api to load balancer
 
-## Add S3 bucket permission for public folder: 
-1. Make sure bucket name does not include any "."'s 
-2. Click on bucket -> Permissions -> Block public access (bucket settings) Press Edit 
-3. Tick Block public access to buckets and objects granted through new access control lists (ACLs) 
-4. Tick Block public access to buckets and objects granted through any access control lists (ACLs) 
-5. Leave others unticked 
-6. Save 
-7. Go to bucket policy -> Edit: 
-8. Add JSON - https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-with-s3-actions.html 
-9. Link resource path to folder and all contents in it you want to be public 
+## Add S3 bucket permission for public folder:
+
+1. Make sure bucket name does not include any "."'s
+2. Click on bucket -> Permissions -> Block public access (bucket settings) Press Edit
+3. Tick Block public access to buckets and objects granted through new access control lists (ACLs)
+4. Tick Block public access to buckets and objects granted through any access control lists (ACLs)
+5. Leave others unticked
+6. Save
+7. Go to bucket policy -> Edit:
+8. Add JSON - https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-with-s3-actions.html
+9. Link resource path to folder and all contents in it you want to be public
 10. Save changes
 
-## Set up server HTTPS: 
-### Generate SSL Certificate 
-   1. Go to AWS Certificate Manager -> Certificates 
-   2. Request 
-   3. Request a public certificate 
-   4. Enter domain name, DNS validation, RSA 2048 
-   5. Request 
-### Set up load balancer to allow HTTPS 
-   1. Go to load balancer 
-   2. Add listener 
-   3. Select HTTPS 
-   4. Forward to app-env-tg 
-   5. Select your SSL certificate from step 1 
-   6. Add
+## Set up server HTTPS:
 
-## Allow access through HTTPS only: 
-1. Go to load balancer 
-2. Select load balancer -> add listener 
+### Generate SSL Certificate
+
+1.  Go to AWS Certificate Manager -> Certificates
+2.  Request
+3.  Request a public certificate
+4.  Enter domain name, DNS validation, RSA 2048
+5.  Request
+
+### Set up load balancer to allow HTTPS
+
+1.  Go to load balancer
+2.  Add listener
+3.  Select HTTPS
+4.  Forward to app-env-tg
+5.  Select your SSL certificate from step 1
+6.  Add
+
+## Allow access through HTTPS only:
+
+1. Go to load balancer
+2. Select load balancer -> add listener
 3. Add HTTP:80 port and redirect action to HTTPS:443
 
-## FAQ: 
-1. Where to check server logs - Go to ECS -> Clusters -> your cluster name -> Tasks -> select your task -> logs - or go to CloudWatch -> log groups -> /ecs/ 
-2. When cannot access server website: - Check if ECS task is running/recent - Check Cloudwatch loggroup logs 
-3. When agent failed to connect: 
-- Press on app-service in ECS -> Deployments and Events -> Events 
-- "service app-service was unable to place a task because no container instance met all of its requirements. The closest matching container-instance <container-id> doesn't have the agent connected. For more information, see the Troubleshooting section of the Amazon ECS Developer Guide." 
-- Go to EC2 instance -> Select -> Instance state -> Reboot instance 
+## FAQ:
+
+1. Where to check server logs - Go to ECS -> Clusters -> your cluster name -> Tasks -> select your task -> logs - or go to CloudWatch -> log groups -> /ecs/
+2. When cannot access server website: - Check if ECS task is running/recent - Check Cloudwatch loggroup logs
+3. When agent failed to connect:
+
+- Press on app-service in ECS -> Deployments and Events -> Events
+- "service app-service was unable to place a task because no container instance met all of its requirements. The closest matching container-instance <container-id> doesn't have the agent connected. For more information, see the Troubleshooting section of the Amazon ECS Developer Guide."
+- Go to EC2 instance -> Select -> Instance state -> Reboot instance
 - Go to service -> select -> update
 
 # CustomImageField
 
 ## Fields
+
 1. aspect_ratios (array) - If specified as None it will use the aspect ratio of the uploaded image. If specified a value - has to be a string with slash eg. "1/1", "16/9"
 2. file_types (array) - specifies the file types the image will be generated to
 3. container width (int) - the width of the generated/modified image. Used to limit the maximum width of layouts, to promote better readability on larger screens. We default to 1200px, but you can override this setting, via the PICTURES["CONTAINER_WIDTH"] setting.
-You may also set it to None, should you not use a container.
+   You may also set it to None, should you not use a container.
 4. width_field/height_field - to store the width and the height of the original image
 5. grid_columns (int) - will generate container_width/grid_column number of pictures (eg. container_width = 1200, grid_column=2, will generate 600w and 1200w (2 pictures)). We default to 12 columns, but you can override this setting, via the PICTURES["GRID_COLUMNS"] setting.
 6. pixel_densities (array of int) - generates pictures based on specified pixel densities eg. [1, 2] (will generate x2 images)
@@ -157,9 +182,10 @@ You may also set it to None, should you not use a container.
 10. quality (int) - (ONLY WORKS WITH JPEG) specifies the image quality, on a scale from 1 (worst) to 95 (best). The default is 75. Values above 95 should be avoided; 100 disables portions of the JPEG compression algorithm, and results in large files with hardly any gain in image quality.
 
 Note:
+
 - If keep_original is False: The original image will be modified only to the first aspect ratio set in the aspect_ratios array. If keep_original is true then it will be the expected behavior.
 - file_types only works with keep_original True (will generate pics in array of specified file type)
 - grid_column and pixel densities only work with keep_original True.
-- If you want to generate a specific height - You will need to calculate the specific container_width to aspect ratio that will match the current desired height. 
+- If you want to generate a specific height - You will need to calculate the specific container_width to aspect ratio that will match the current desired height.
 - Quality works for JPEG format only (and currently only with keep_original=False)
-- Future improvements - can choose to change image format to JPEG and quality (right now only support if original image is JPEG) 
+- Future improvements - can choose to change image format to JPEG and quality (right now only support if original image is JPEG)
