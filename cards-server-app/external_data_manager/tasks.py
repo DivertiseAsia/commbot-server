@@ -47,6 +47,7 @@ def get_prices_for_card(card: MtgCard):
 
 
 def _name_matches(to_match, value):
+    logger.info(f"|{value}| before trim")
     value = value.lower()
     to_match = to_match.strip().lower()
 
@@ -60,6 +61,8 @@ def _name_matches(to_match, value):
     value = re.sub(r"\[.*?\]", "", value)
 
     value = value.strip()
+    logger.info(f"|{value}| after trim")
+    logger.info(f"|{value}| == |{to_match}| ? {value == to_match}")
     return value == to_match
 
 
@@ -70,8 +73,12 @@ def update_prices_for_card(card_id: int, chat_id=None):
     getcontext().prec = 2
 
     price_objects = []
+
     for store in prices:
+        logger.info(f"checking cards for {store[0].name}")
+        logger.info(f"checking this list.... f{store[2]}")
         matching_data = [item for item in store[2] if _name_matches(card.name, item[0])]
+        logger.info(f"matching data is {matching_data}")
         if len(matching_data) > 0:
             lowest_price = min(matching_data, key=lambda x: Decimal(x[1]))
             price_obj, _ = MtgStorePrice.objects.update_or_create(
