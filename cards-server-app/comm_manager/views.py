@@ -25,7 +25,7 @@ from linebot.models import (
 import json
 import logging
 
-from comm_manager.models import Chat
+from comm_manager.models import Chat, ChatUser, ChatMembership
 from comm_manager.apis import handler, line_bot_api
 from comm_manager.forms import PushMessageForm
 
@@ -137,6 +137,13 @@ def handle_message(event):
         chat_type = Chat.ChatType.GROUP
     chat, _ = Chat.objects.get_or_create(external_id=chat_id, chat_type=chat_type)
 
+    chat_user, _ = ChatUser.objects.get_or_create(external_id=event.source.user_id)
+
+    if not chat.chatmembership_set.filter(
+        chat_user=chat_user, ended_date__isnull=True
+    ).exists():
+        ChatMembership.objects.create(chat_user=chat_user, chat=chat)
+
     message_text = event.message.text
     lookup_matches = LOOKUP_DATA_VIA_API.findall(message_text)
     if lookup_matches:
@@ -183,9 +190,11 @@ def handle_message(event):
 
 @handler.add(FollowEvent)
 def handle_followevent(event):
-    Chat.objects.get_or_create(
+    (chat, created) = Chat.objects.get_or_create(
         external_id=event.source.user_id, chat_type=Chat.ChatType.INDIVIDUAL
     )
+    if created:
+        chat.users.create(external_id=event.source.user_id)
 
 
 @handler.add(UnfollowEvent)

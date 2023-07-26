@@ -1,5 +1,5 @@
 from config.helpers import BaseTestCase
-from comm_manager.models import Chat
+from comm_manager.models import Chat, ChatUser
 from comm_manager.views import (
     handle_followevent,
     handle_message,
@@ -10,6 +10,7 @@ from comm_manager.views import (
 from linebot.models import TextSendMessage, SourceGroup, SourceUser
 from unittest.mock import patch, call, ANY, MagicMock
 import time
+from django.utils import timezone
 
 
 class TestLineViews(BaseTestCase):
@@ -67,6 +68,10 @@ class TestLineViews(BaseTestCase):
 
         related_chat = Chat.objects.get(external_id="abc")
         self.assertEquals(related_chat.chat_type, Chat.ChatType.INDIVIDUAL)
+        self.assertEquals(1, related_chat.users.count())
+        related_chat_user = related_chat.users.first()
+        self.assertEquals("abc", related_chat_user.external_id)
+        self.assertEquals(None, related_chat_user.display_name)
 
     def test_user_follows_bot_twice_does_not_explode(self):
         self.assertEquals(0, Chat.objects.filter(external_id="abc").count())
@@ -75,7 +80,8 @@ class TestLineViews(BaseTestCase):
         handle_followevent(event)
         handle_followevent(event)
 
-        self.assertEquals(1, Chat.objects.filter(external_id="abc").count())
+        chat = Chat.objects.get(external_id="abc")
+        self.assertEquals(1, chat.users.count())
 
     @patch("comm_manager.apis.line_bot_api.reply_message")
     def test_user_messages_bot_first_time_creates_chat_if_none_exists(self, mock):
@@ -111,17 +117,53 @@ class TestLineViews(BaseTestCase):
 
         related_chat = Chat.objects.get(external_id="groupA")
         self.assertEquals(related_chat.chat_type, Chat.ChatType.GROUP)
+        related_chat_user = related_chat.users.first()
+        self.assertEquals("abc", related_chat_user.external_id)
+        self.assertEquals(None, related_chat_user.display_name)
+
+    @patch("external_data_manager.helpers.scryfall_search")
+    @patch("comm_manager.apis.line_bot_api.reply_message")
+    def test_user_messages_bot_from_group_after_leaving_group_creates_new_membership(
+        self, mock, mock_scryfall
+    ):
+        mock_scryfall.return_value = None
+        self.assertEquals(0, Chat.objects.filter(external_id="groupA").count())
+        intial_chat_users = ChatUser.objects.all().count()
+        event = self.given_message_event_in_group("[[msg]]", "abc", "groupA")
+        handle_message(event)
+
+        self.assertEquals(intial_chat_users + 1, ChatUser.objects.all().count())
+        related_chat = Chat.objects.get(external_id="groupA")
+        self.assertEquals(1, related_chat.chatmembership_set.all().count())
+        first_membership = related_chat.chatmembership_set.first()
+
+        self.assertEquals(None, first_membership.ended_date)
+        first_membership.ended_date = timezone.now()
+        first_membership.save()
+
+        handle_message(event)
+
+        self.assertEquals(intial_chat_users + 1, ChatUser.objects.all().count())
+        self.assertEquals(2, related_chat.chatmembership_set.all().count())
+
+        handle_message(event)
+        self.assertEquals(2, related_chat.chatmembership_set.all().count())
 
     @patch("comm_manager.apis.line_bot_api.reply_message")
     def test_user_messages_bot_later_time_does_not_make_a_second(self, mock):
         self.assertEquals(0, Chat.objects.filter(external_id="abc").count())
+        initial_chat_users = ChatUser.objects.all().count()
         event = self.given_message_event("msg", "abc")
         handle_message(event)
 
         time.sleep(0.1)
         handle_message(event)
 
-        self.assertEquals(1, Chat.objects.filter(external_id="abc").count())
+        related_chats = Chat.objects.filter(external_id="abc")
+        self.assertEquals(1, related_chats.count())
+        self.assertEquals(1, related_chats.first().users.count())
+        self.assertEquals(initial_chat_users + 1, ChatUser.objects.all().count())
+        self.assertEquals(1, related_chats.first().chatmembership_set.all().count())
 
     def test_user_unfollows_bot_updates_chat(self):
         self.assertEquals(0, Chat.objects.filter(external_id="abc").count())
