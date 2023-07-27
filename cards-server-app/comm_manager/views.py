@@ -21,6 +21,7 @@ from linebot.models import (
     JoinEvent,
     LeaveEvent,
     SourceGroup,
+    MemberJoinedEvent,
 )
 import json
 import logging
@@ -220,3 +221,15 @@ def handle_leaveevent(event):
     )
     chat.ended_date = timezone.now()
     chat.save()
+
+
+@handler.add(MemberJoinedEvent)
+def handle_memberjoinedevent(event):
+    chat = Chat.objects.get(external_id=event.source.group_id)
+
+    chat_user, _ = ChatUser.objects.get_or_create(external_id=event.source.user_id)
+
+    if not chat.chatmembership_set.filter(
+        chat_user=chat_user, ended_date__isnull=True
+    ).exists():
+        ChatMembership.objects.create(chat_user=chat_user, chat=chat)

@@ -1,11 +1,12 @@
 from config.helpers import BaseTestCase
-from comm_manager.models import Chat, ChatUser
+from comm_manager.models import Chat, ChatUser, ChatMembership
 from comm_manager.views import (
     handle_followevent,
     handle_message,
     handle_unfollowevent,
     handle_joinevent,
     handle_leaveevent,
+    handle_memberjoinedevent,
 )
 from linebot.models import TextSendMessage, SourceGroup, SourceUser
 from unittest.mock import patch, call, ANY, MagicMock
@@ -287,3 +288,70 @@ class TestLineViews(BaseTestCase):
         handle_message(event)
 
         assert not mock.called
+
+    def test_new_person_joins_group_chat_they_have_first_membership(self):
+        given_user_id = "abc"
+        given_chat_id = "group1"
+        Chat.objects.create(external_id=given_chat_id, chat_type=Chat.ChatType.GROUP)
+        self.assertEquals(0, ChatUser.objects.filter(external_id=given_user_id).count())
+        event = self.given_event_with_group_details("msg", given_user_id, given_chat_id)
+
+        handle_memberjoinedevent(event)
+
+        chat = Chat.objects.get(external_id=given_chat_id)
+        chat_user = ChatUser.objects.get(external_id=given_user_id)
+        self.assertEquals(
+            1, ChatMembership.objects.filter(chat=chat, chat_user=chat_user).count()
+        )
+
+    def test_existing_person_joins_group_chat_they_have_first_membership(self):
+        given_user_id = "abc"
+        given_chat_id = "group1"
+        Chat.objects.create(external_id=given_chat_id, chat_type=Chat.ChatType.GROUP)
+        ChatUser.objects.create(external_id=given_user_id)
+        event = self.given_event_with_group_details("msg", given_user_id, given_chat_id)
+
+        handle_memberjoinedevent(event)
+
+        chat = Chat.objects.get(external_id=given_chat_id)
+        chat_user = ChatUser.objects.get(external_id=given_user_id)
+        self.assertEquals(
+            1, ChatMembership.objects.filter(chat=chat, chat_user=chat_user).count()
+        )
+
+    def test_existing_person_REjoins_group_chat_they_had_preexisting_membership(self):
+        given_user_id = "abc"
+        given_chat_id = "group1"
+        chat = Chat.objects.create(
+            external_id=given_chat_id, chat_type=Chat.ChatType.GROUP
+        )
+        chat_user = ChatUser.objects.create(external_id=given_user_id)
+        ChatMembership.objects.create(
+            chat=chat, chat_user=chat_user, ended_date=timezone.now()
+        )
+
+        event = self.given_event_with_group_details("msg", given_user_id, given_chat_id)
+
+        handle_memberjoinedevent(event)
+
+        self.assertEquals(
+            2, ChatMembership.objects.filter(chat=chat, chat_user=chat_user).count()
+        )
+
+    def test_existing_person_joins_group_chat_twice_fired_doesnt_create_bad_data(self):
+        given_user_id = "abc"
+        given_chat_id = "group1"
+        chat = Chat.objects.create(
+            external_id=given_chat_id, chat_type=Chat.ChatType.GROUP
+        )
+        chat_user = ChatUser.objects.create(external_id=given_user_id)
+        ChatMembership.objects.create(chat=chat, chat_user=chat_user)
+
+        event = self.given_event_with_group_details("msg", given_user_id, given_chat_id)
+
+        handle_memberjoinedevent(event)
+        handle_memberjoinedevent(event)
+
+        self.assertEquals(
+            1, ChatMembership.objects.filter(chat=chat, chat_user=chat_user).count()
+        )
