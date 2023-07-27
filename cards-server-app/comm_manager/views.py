@@ -140,10 +140,7 @@ def handle_message(event):
 
     chat_user, _ = ChatUser.objects.get_or_create(external_id=event.source.user_id)
 
-    if not chat.chatmembership_set.filter(
-        chat_user=chat_user, ended_date__isnull=True
-    ).exists():
-        ChatMembership.objects.create(chat_user=chat_user, chat=chat)
+    ChatMembership.objects.get_or_create_not_ended(chat=chat, chat_user=chat_user)
 
     message_text = event.message.text
     lookup_matches = LOOKUP_DATA_VIA_API.findall(message_text)
@@ -229,7 +226,4 @@ def handle_memberjoinedevent(event):
 
     chat_user, _ = ChatUser.objects.get_or_create(external_id=event.source.user_id)
 
-    if not chat.chatmembership_set.filter(
-        chat_user=chat_user, ended_date__isnull=True
-    ).exists():
-        ChatMembership.objects.create(chat_user=chat_user, chat=chat)
+    ChatMembership.objects.get_or_create_not_ended(chat=chat, chat_user=chat_user)

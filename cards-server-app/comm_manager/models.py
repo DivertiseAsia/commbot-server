@@ -1,6 +1,7 @@
 import uuid
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from typing import Any, Tuple
 
 
 class ChatUser(models.Model):
@@ -30,8 +31,25 @@ class Chat(models.Model):
     users = models.ManyToManyField(ChatUser, through="ChatMembership")
 
 
+class ChatMembershipManager(models.Manager):
+    def get_or_create_not_ended(
+        self, chat: Chat, chat_user: ChatUser
+    ) -> Tuple[Any, bool]:
+        chat_memberships = chat.chatmembership_set.filter(
+            chat_user=chat_user, ended_date__isnull=True
+        )
+        if chat_memberships.exists():
+            return (chat_memberships.first(), False)
+        else:
+            new_membership = self.model(chat_user=chat_user, chat=chat)
+            new_membership.save()
+            return (new_membership, True)
+
+
 class ChatMembership(models.Model):
     chat_user = models.ForeignKey(ChatUser, on_delete=models.CASCADE)
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
     first_seen_date = models.DateTimeField(_("First Seen Date"), auto_now_add=True)
     ended_date = models.DateTimeField(blank=True, null=True)
+
+    objects = ChatMembershipManager()
