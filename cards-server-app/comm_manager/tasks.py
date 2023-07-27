@@ -10,7 +10,7 @@ def get_profile_for_user(external_id: str):
     groupchat_membership = ChatMembership.objects.filter(
         chat__chat_type=Chat.ChatType.GROUP,
         chat_user=chat_user,
-        ended_date__is_null=False,
+        ended_date__isnull=False,
     )
     if groupchat_membership.exists():
         groupchat_membership = groupchat_membership.first()
