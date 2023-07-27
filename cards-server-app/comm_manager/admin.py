@@ -4,6 +4,8 @@ from import_export.admin import ImportExportModelAdmin
 
 from comm_manager.models import Chat, ChatUser, ChatMembership
 
+from comm_manager.tasks import get_profile_for_user
+
 
 class ChatMembershipInlineAdmin(admin.TabularInline):
     model = ChatMembership
@@ -16,6 +18,16 @@ class ChatUserAdminView(ImportExportModelAdmin):
 
     search_fields = ("id", "external_id", "display_name")
     inlines = (ChatMembershipInlineAdmin,)
+    actions = ["pull_user_data"]
+
+    def pull_user_data(self, request, queryset):
+        for obj in queryset:
+            get_profile_for_user.delay(obj.external_id)
+
+        self.message_user(
+            request,
+            "Pulling user data for selected users",
+        )
 
 
 class ChatAdminView(ImportExportModelAdmin):
