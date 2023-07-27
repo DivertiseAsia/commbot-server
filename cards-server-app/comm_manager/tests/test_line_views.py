@@ -7,6 +7,7 @@ from comm_manager.views import (
     handle_joinevent,
     handle_leaveevent,
     handle_memberjoinedevent,
+    handle_memberleftevent,
 )
 from linebot.models import TextSendMessage, SourceGroup, SourceUser
 from unittest.mock import patch, call, ANY, MagicMock
@@ -354,4 +355,94 @@ class TestLineViews(BaseTestCase):
 
         self.assertEquals(
             1, ChatMembership.objects.filter(chat=chat, chat_user=chat_user).count()
+        )
+
+    def test_notexisting_person_leaving_group_chat_without_membership_still_saves_them(
+        self,
+    ):
+        given_user_id = "abc"
+        given_chat_id = "group1"
+        chat = Chat.objects.create(
+            external_id=given_chat_id, chat_type=Chat.ChatType.GROUP
+        )
+
+        event = self.given_event_with_group_details("msg", given_user_id, given_chat_id)
+
+        handle_memberleftevent(event)
+
+        membership = ChatMembership.objects.get(
+            chat=chat, chat_user=ChatUser.objects.get(external_id=given_user_id)
+        )
+
+        self.assertNotEquals(None, membership.ended_date)
+
+    def test_existing_person_leaves_group_chat_they_had_preexisting_membership(self):
+        given_user_id = "abc"
+        given_chat_id = "group1"
+        chat = Chat.objects.create(
+            external_id=given_chat_id, chat_type=Chat.ChatType.GROUP
+        )
+        chat_user = ChatUser.objects.create(external_id=given_user_id)
+        ChatMembership.objects.create(
+            chat=chat, chat_user=chat_user, ended_date=timezone.now()
+        )
+
+        event = self.given_event_with_group_details("msg", given_user_id, given_chat_id)
+
+        handle_memberleftevent(event)
+
+        membership = ChatMembership.objects.get(chat=chat, chat_user=chat_user)
+
+        self.assertNotEquals(None, membership.ended_date)
+
+    def test_existing_person_leaves_group_chat_firing_twice_does_not_cause_data_error(
+        self,
+    ):
+        given_user_id = "abc"
+        given_chat_id = "group1"
+        chat = Chat.objects.create(
+            external_id=given_chat_id, chat_type=Chat.ChatType.GROUP
+        )
+        chat_user = ChatUser.objects.create(external_id=given_user_id)
+        ChatMembership.objects.create(
+            chat=chat, chat_user=chat_user, ended_date=timezone.now()
+        )
+
+        event = self.given_event_with_group_details("msg", given_user_id, given_chat_id)
+
+        handle_memberleftevent(event)
+        handle_memberleftevent(event)
+
+        membership = ChatMembership.objects.get(chat=chat, chat_user=chat_user)
+
+        self.assertNotEquals(None, membership.ended_date)
+
+    def test_existing_person_leaves_group_chat_twice_does_not_update_old_one(
+        self,
+    ):
+        given_user_id = "abc"
+        given_chat_id = "group1"
+        chat = Chat.objects.create(
+            external_id=given_chat_id, chat_type=Chat.ChatType.GROUP
+        )
+        chat_user = ChatUser.objects.create(external_id=given_user_id)
+        ChatMembership.objects.create(
+            chat=chat, chat_user=chat_user, ended_date=timezone.now()
+        )
+
+        event = self.given_event_with_group_details("msg", given_user_id, given_chat_id)
+
+        handle_memberleftevent(event)
+
+        time.sleep(0.1)
+
+        handle_memberjoinedevent(event)
+
+        handle_memberleftevent(event)
+
+        memberships = ChatMembership.objects.filter(chat=chat, chat_user=chat_user)
+        self.assertEquals(2, memberships.count())
+
+        self.assertNotEquals(
+            memberships.first().ended_date, memberships.last().ended_date
         )
