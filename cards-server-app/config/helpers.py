@@ -1,16 +1,16 @@
+import unittest
+
 from django.conf import settings
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
-from django.core.files import File
 from django.shortcuts import resolve_url
-from django.template.defaultfilters import filesizeformat
+from django.test.runner import DiscoverRunner
 from django.utils.html import format_html
 from django.utils.http import urlencode
 from django.utils.safestring import SafeText
 from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.test import APITestCase
-
-from user_manager.models import User, Profile
+from user_manager.models import Profile, User
 
 
 def model_admin_url(obj, name: str = None) -> str:
@@ -29,6 +29,20 @@ def get_all_field_names(model_class):
 
 def get_no_reply_email():
     return getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@divertise.asia")
+
+
+class CustomTestResult(unittest.TextTestResult):
+    def addSuccess(self, test):
+        super().addSuccess(test)
+        print(f">> {test._testMethodName}: OK <<")
+
+
+class CustomTestRunner(DiscoverRunner):
+    def run_suite(self, suite, **kwargs):
+        runner = unittest.TextTestRunner(
+            verbosity=self.verbosity, resultclass=CustomTestResult
+        )
+        return runner.run(suite)
 
 
 class BaseTestCase(APITestCase):

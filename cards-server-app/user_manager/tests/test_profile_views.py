@@ -1,9 +1,9 @@
 # """
 # User Manager's Porfile Views
 # """
-from rest_framework.reverse import reverse
-from user_manager.models import User, Profile
 from config.helpers import BaseTestCase
+from rest_framework.reverse import reverse
+from user_manager.models import Profile, User
 
 
 class TestProfileViews(BaseTestCase):
@@ -18,7 +18,6 @@ class TestProfileViews(BaseTestCase):
 
         self.when_user_gets_json()
         self.assertResponseNotAuthorized()
-        print(">> test_get_profile_for_logged_out_user_is_not_authorized: OK <<")
 
     def test_get_profile_for_logged_in_user_with_profile_returns_profile(self):
         user = self.given_a_new_user(email=self.user_email)
@@ -38,8 +37,6 @@ class TestProfileViews(BaseTestCase):
         self.assertEquals(self.last_name, self.response_json["last_name"])
         self.assertEquals(self.user_email, self.response_json["email"])
 
-        print(">> test_get_profile_for_user_with_profile_returns_profile: OK <<")
-
     def test_get_profile_for_logged_in_user_without_profile_returns_empty_profile_except_email(
         self,
     ):
@@ -57,10 +54,6 @@ class TestProfileViews(BaseTestCase):
         self.assertEquals("", self.response_json["last_name"])
         self.assertEquals(self.user_email, self.response_json["email"])
         self.assertFalse(Profile.objects.filter(user=user).exists())
-
-        print(
-            ">> test_get_profile_for_logged_in_user_without_profile_returns_empty_profile_except_email: OK <<"
-        )
 
     def test_update_profile_with_valid_data_is_okay(self):
         user = self.given_a_new_user(email=self.user_email)
@@ -96,8 +89,6 @@ class TestProfileViews(BaseTestCase):
         self.assertTrue(User.objects.filter(email=new_email).exists())
         self.assertFalse(User.objects.filter(email=self.user_email).exists())
 
-        print(">> test_update_profile_with_valid_data_is_okay: OK <<")
-
     def test_update_profile_with_blank_email_is_bad_request(self):
         user = self.given_a_new_user(email=self.user_email)
         self.given_a_profile_for_user(
@@ -120,8 +111,6 @@ class TestProfileViews(BaseTestCase):
         self.assertEquals(["This field may not be blank."], self.response_json["email"])
 
         self.assertTrue(User.objects.filter(email=self.user_email).exists())
-
-        print(">> test_update_profile_with_blank_email_is_bad_request: OK <<")
 
     def test_update_creates_profile_and_edits_email_with_valid_data_if_none_is_okay(
         self,
@@ -156,10 +145,6 @@ class TestProfileViews(BaseTestCase):
         self.assertTrue(User.objects.filter(email=new_email).exists())
         self.assertFalse(User.objects.filter(email=self.user_email).exists())
 
-        print(
-            ">> test_update_creates_profile_and_edits_email_with_valid_data_if_none_is_okay: OK <<"
-        )
-
     def test_update_creates_profile_without_email_change_with_valid_data_if_none_is_okay(
         self,
     ):
@@ -191,10 +176,6 @@ class TestProfileViews(BaseTestCase):
 
         self.assertTrue(User.objects.filter(email=self.user_email).exists())
 
-        print(
-            ">> test_update_creates_profile_without_email_change_with_valid_data_if_none_is_okay: OK <<"
-        )
-
     def test_update_profile_with_reused_email_is_badrequest(self):
         new_email = self.user_email + ".new"
         user = self.given_a_new_user(email=self.user_email)
@@ -220,8 +201,6 @@ class TestProfileViews(BaseTestCase):
             self.response_json["non_field_errors"],
         )
 
-        print(">> test_update_profile_with_reused_email_is_badrequest: OK <<")
-
     def test_create_profile_with_reused_email_is_badrequest(self):
         reused_email = self.user_email + ".new"
         user = self.given_a_new_user(email=self.user_email)
@@ -244,4 +223,3 @@ class TestProfileViews(BaseTestCase):
             self.response_json["non_field_errors"],
         )
         self.assertFalse(Profile.objects.filter(user=user).exists())
-        print(">> test_update_profile_with_reused_email_is_badrequest: OK <<")

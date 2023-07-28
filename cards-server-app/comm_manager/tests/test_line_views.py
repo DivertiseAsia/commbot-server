@@ -1,18 +1,19 @@
-from config.helpers import BaseTestCase
-from comm_manager.models import Chat, ChatUser, ChatMembership
+import time
+from unittest.mock import MagicMock, call, patch
+
+from comm_manager.models import Chat, ChatMembership, ChatUser
 from comm_manager.views import (
     handle_followevent,
-    handle_message,
-    handle_unfollowevent,
     handle_joinevent,
     handle_leaveevent,
     handle_memberjoinedevent,
     handle_memberleftevent,
+    handle_message,
+    handle_unfollowevent,
 )
-from linebot.models import TextSendMessage, SourceGroup, SourceUser
-from unittest.mock import patch, call, ANY, MagicMock
-import time
+from config.helpers import BaseTestCase
 from django.utils import timezone
+from linebot.models import SourceGroup, SourceUser, TextSendMessage
 
 
 class TestLineViews(BaseTestCase):

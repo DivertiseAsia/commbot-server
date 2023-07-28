@@ -1,9 +1,9 @@
 # """
 # User manager's views tests
 # """
-from rest_framework.reverse import reverse
-from user_manager.models import User, Profile
 from config.helpers import BaseTestCase
+from rest_framework.reverse import reverse
+from user_manager.models import Profile, User
 
 
 class TestAuthViews(BaseTestCase):
@@ -22,7 +22,6 @@ class TestAuthViews(BaseTestCase):
 
         self.assertResponseSuccess()
         self.assertIn("token", self.response_json)
-        print(">> test_login_success_returns_token: OK <<")
 
     def test_login_updates_last_login(self):
         user = self.given_a_new_user(email=self.user_email, password=self.user_password)
@@ -45,7 +44,6 @@ class TestAuthViews(BaseTestCase):
         self.assertResponseSuccess()
         user.refresh_from_db()
         self.assertGreater(user.last_login, first_login)
-        print(">> test_login_updates_last_login: OK <<")
 
     def test_login_with_inactive_user_fails(self):
         user = self.given_a_new_user(email=self.user_email, password=self.user_password)
@@ -63,7 +61,6 @@ class TestAuthViews(BaseTestCase):
         self.assertEqual(
             self.response_json["non_field_errors"], ["This email is inactive."]
         )
-        print(">> test_login_with_inactive_user_fails: OK <<")
 
     def test_login_requires_email_and_password(self):
         self.given_url(reverse("v1:auth-login"))
@@ -75,7 +72,6 @@ class TestAuthViews(BaseTestCase):
         self.assertIn("password", self.response_json)
         self.assertEqual(self.response_json["email"], ["This field is required."])
         self.assertEqual(self.response_json["password"], ["This field is required."])
-        print(">> test_login_requires_email_and_password: OK <<")
 
     def test_login_with_nonexistant_email_fails(self):
         modified_email = self.user_email + ".dne"
@@ -93,7 +89,6 @@ class TestAuthViews(BaseTestCase):
         self.assertEqual(
             self.response_json["non_field_errors"], ["This email does not exist."]
         )
-        print(">> test_login_with_nonexistant_email_fails: OK <<")
 
     def test_login_wrong_pass_fails(self):
         self.given_a_new_user(email=self.user_email, password=self.user_password)
@@ -109,7 +104,6 @@ class TestAuthViews(BaseTestCase):
         self.assertEqual(
             self.response_json["non_field_errors"], ["Password is incorrect."]
         )
-        print(">> test_login_wrong_pass_fails: OK <<")
 
     def test_change_password_success(self):
         user = self.given_a_new_user(email=self.user_email, password=self.user_password)
@@ -124,7 +118,6 @@ class TestAuthViews(BaseTestCase):
             }
         )
         self.assertResponseSuccess()
-        print(">> test_change_password_success: OK <<")
 
     def test_change_password_is_bad_request_when_wrong_password(self):
         user = self.given_a_new_user(email=self.user_email, password=self.user_password)
@@ -144,7 +137,6 @@ class TestAuthViews(BaseTestCase):
             ["Your old password is incorrect."],
             self.response_json["non_field_errors"],
         )
-        print(">> test_change_password_is_bad_request_when_wrong_password: OK <<")
 
     def test_change_password_is_bad_request_when_passwords_do_not_match(self):
         user = self.given_a_new_user(email=self.user_email, password=self.user_password)
@@ -163,9 +155,6 @@ class TestAuthViews(BaseTestCase):
         self.assertEquals(
             ["New password and confirm password do not match."],
             self.response_json["non_field_errors"],
-        )
-        print(
-            ">> test_change_password_is_bad_request_when_passwords_do_not_match: OK <<"
         )
 
     def test_change_password_fails_when_password_fails_validator(self):
@@ -189,7 +178,6 @@ class TestAuthViews(BaseTestCase):
             ],
             self.response_json["non_field_errors"],
         )
-        print(">> test_change_password_fails_when_password_fails_validator: OK <<")
 
     def test_register_success_returns_user(self):
         first_name = "abc"
@@ -222,7 +210,6 @@ class TestAuthViews(BaseTestCase):
         profile = Profile.objects.get(user__email=self.user_email)
         self.assertEquals(first_name, profile.first_name)
         self.assertEquals(last_name, profile.last_name)
-        print(">> test_register_success_returns_user: OK <<")
 
     def test_register_mismatch_password_is_bad_request(self):
         first_name = "abc"
@@ -247,7 +234,6 @@ class TestAuthViews(BaseTestCase):
         )
 
         self.assertFalse(User.objects.filter(email=self.user_email).exists())
-        print(">> test_register_mismatch_password_is_bad_request: OK <<")
 
     def test_register_requires_confirm_password_otherwise_bad_request(self):
         first_name = "abc"
@@ -271,7 +257,6 @@ class TestAuthViews(BaseTestCase):
         )
 
         self.assertFalse(User.objects.filter(email=self.user_email).exists())
-        print(">> test_register_requires_confirm_password_otherwise_bad_request: OK <<")
 
     def test_register_requires_valid_password_otherwise_bad_request(self):
         first_name = "abc"
@@ -300,7 +285,6 @@ class TestAuthViews(BaseTestCase):
         )
 
         self.assertFalse(User.objects.filter(email=self.user_email).exists())
-        print(">> test_register_requires_valid_password_otherwise_bad_request: OK <<")
 
     def test_register_email_to_not_match_other_user_or_bad_request(self):
         self.given_a_new_user("a@a.com")
@@ -327,4 +311,3 @@ class TestAuthViews(BaseTestCase):
         )
 
         self.assertFalse(User.objects.filter(email=self.user_email).exists())
-        print(">> test_register_email_to_not_match_other_user_or_bad_request: OK <<")

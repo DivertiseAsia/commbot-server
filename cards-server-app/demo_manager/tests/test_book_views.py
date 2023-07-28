@@ -2,18 +2,23 @@
 # Demo Manager's Book Views
 # """
 
-from rest_framework.reverse import reverse
-
 from config.helpers import BaseTestCase
 from demo_manager.models import Author, Book
+from rest_framework.reverse import reverse
 
 
 class TestBookViews(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.book_rabbit_and_turtle = self.create_object({"title": "Rabbit and Turtle", "isbn": "000000000001"})
-        self.book_rapunzel = self.create_object({"title": "Rapunzel", "isbn": "000000000002"})
-        self.book_cinderella = self.create_object({"title": "Cinderella", "isbn": "000000000003"})
+        self.book_rabbit_and_turtle = self.create_object(
+            {"title": "Rabbit and Turtle", "isbn": "000000000001"}
+        )
+        self.book_rapunzel = self.create_object(
+            {"title": "Rapunzel", "isbn": "000000000002"}
+        )
+        self.book_cinderella = self.create_object(
+            {"title": "Cinderella", "isbn": "000000000003"}
+        )
 
         self.author_aesop = self.create_author({"name": "Aesop"})
         self.author_brothers_grimm = self.create_author({"name": "Brothers Grimm"})
@@ -52,7 +57,9 @@ class TestBookViews(BaseTestCase):
     def assertTitleOrdering(self, response_json, expected_book):
         self.assertEqual(expected_book.title, response_json["title"])
 
-    def test_get_book_list_with_page_negative_one_would_return_results_without_pagination(self):
+    def test_get_book_list_with_page_negative_one_would_return_results_without_pagination(
+        self,
+    ):
         self.given_url(self.get_url_reverse("list"))
         self.given_page_query_param(-1)
 
@@ -64,7 +71,6 @@ class TestBookViews(BaseTestCase):
         self.assertNotIn("previous", self.response_json)
         self.assertNotIn("results", self.response_json)
         self.assertResponseResultKeys(self.response_json[0])
-        print(">> test_get_book_list_with_page_negative_one_would_return_results_without_pagination: OK <<")
 
     def test_get_book_list_without_page_query_param_return_book_first_page(self):
         self.given_url(self.get_url_reverse("list"))
@@ -74,7 +80,6 @@ class TestBookViews(BaseTestCase):
         self.assertResponseSuccess()
         self.assertResponsePagination()
         self.assertResponseResultKeys(self.response_json["results"][0])
-        print(">> test_get_book_list_without_page_query_param: OK <<")
 
     def test_get_book_list_with_valid_page_return_book_with_pagination(self):
         self.given_url(self.get_url_reverse("list"))
@@ -85,7 +90,6 @@ class TestBookViews(BaseTestCase):
         self.assertResponseSuccess()
         self.assertResponsePagination()
         self.assertResponseResultKeys(self.response_json["results"][0])
-        print(">> test_get_book_list_with_valid_page: OK <<")
 
     def test_get_book_list_with_invalid_page_0_return_not_found_invalid_page(self):
         self.given_url(self.get_url_reverse("list"))
@@ -94,7 +98,6 @@ class TestBookViews(BaseTestCase):
         self.when_user_gets_json()
 
         self.assertResponseNotFound()
-        print(">> test_get_book_list_with_invalid_page_0: OK <<")
 
     def test_get_book_list_with_invalid_page_return_not_found_invalid_page(self):
         self.given_url(self.get_url_reverse("list"))
@@ -104,7 +107,6 @@ class TestBookViews(BaseTestCase):
 
         self.assertResponseNotFound()
         self.assertEqual(self.response_json["detail"], "Invalid page.")
-        print(">> test_get_book_list_with_invalid_page: OK <<")
 
     def test_get_book_list_of_bros_grimm_with_page_1_return_book_with_pagination(self):
         self.given_url(self.get_url_reverse("list"))
@@ -119,7 +121,6 @@ class TestBookViews(BaseTestCase):
         self.assertResponseResultKeys(results_json[0])
         for result in results_json:
             self.assertIn(self.author_brothers_grimm.name, result["authors"])
-        print(">> test_get_book_list_of_bros_grimm_with_page_1: OK <<")
 
     def test_get_book_list_of_title_ra_with_page_1_return_book_with_pagination(self):
         self.given_url(self.get_url_reverse("list"))
@@ -135,9 +136,10 @@ class TestBookViews(BaseTestCase):
         self.assertIn(self.book_rabbit_and_turtle.title, response_titles)
         self.assertIn(self.book_rapunzel.title, response_titles)
         self.assertNotIn(self.book_cinderella.title, response_titles)
-        print(">> test_get_book_list_of_title_ra_with_page_1: OK <<")
 
-    def test_get_book_list_ordering_title_asc_with_page_1_return_book_with_pagination(self):
+    def test_get_book_list_ordering_title_asc_with_page_1_return_book_with_pagination(
+        self,
+    ):
         self.given_url(self.get_url_reverse("list"))
         self.given_page_query_param(1)
         self.query_params.update({"ordering": "title"})
@@ -151,9 +153,10 @@ class TestBookViews(BaseTestCase):
         self.assertTitleOrdering(response_results[0], self.book_cinderella)
         self.assertTitleOrdering(response_results[1], self.book_rabbit_and_turtle)
         self.assertTitleOrdering(response_results[2], self.book_rapunzel)
-        print(">> test_get_book_list_ordering_asc_with_page_1: OK <<")
 
-    def test_get_book_list_ordering_title_desc_with_page_1_return_book_with_paginationf(self):
+    def test_get_book_list_ordering_title_desc_with_page_1_return_book_with_paginationf(
+        self,
+    ):
         self.given_url(self.get_url_reverse("list"))
         self.given_page_query_param(1)
         self.query_params.update({"ordering": "-title"})
@@ -167,4 +170,3 @@ class TestBookViews(BaseTestCase):
         self.assertTitleOrdering(response_results[0], self.book_rapunzel)
         self.assertTitleOrdering(response_results[1], self.book_rabbit_and_turtle)
         self.assertTitleOrdering(response_results[2], self.book_cinderella)
-        print(">> test_get_book_list_ordering_title_desc_with_page_1: OK <<")
