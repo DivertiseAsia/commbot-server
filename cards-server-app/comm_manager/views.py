@@ -1,35 +1,33 @@
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from django.utils import timezone
-from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse
-from django.contrib.sites.models import Site
-from urllib.parse import quote
-
-import re
-import time
-
-from linebot.exceptions import InvalidSignatureError
-from linebot.models import (
-    MessageEvent,
-    TextMessage,
-    TextSendMessage,
-    FlexSendMessage,
-    FollowEvent,
-    UnfollowEvent,
-    JoinEvent,
-    LeaveEvent,
-    SourceGroup,
-    MemberJoinedEvent,
-    MemberLeftEvent,
-)
 import json
 import logging
+import re
+import time
+from urllib.parse import quote
 
-from comm_manager.models import Chat, ChatUser, ChatMembership
 from comm_manager.apis import handler, line_bot_api
 from comm_manager.forms import PushMessageForm
+from comm_manager.models import Chat, ChatMembership, ChatMessage, ChatUser
+from django.contrib.sites.models import Site
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils import timezone
+from linebot.exceptions import InvalidSignatureError
+from linebot.models import (
+    FlexSendMessage,
+    FollowEvent,
+    JoinEvent,
+    LeaveEvent,
+    MemberJoinedEvent,
+    MemberLeftEvent,
+    MessageEvent,
+    SourceGroup,
+    TextMessage,
+    TextSendMessage,
+    UnfollowEvent,
+)
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 logger = logging.getLogger("comm_views")
 
@@ -144,12 +142,12 @@ def handle_message(event):
     ChatMembership.objects.get_or_create_not_ended(chat=chat, chat_user=chat_user)
 
     message_text = event.message.text
+    ChatMessage.objects.create(message=message_text, chat_user=chat_user, chat=chat)
     lookup_matches = LOOKUP_DATA_VIA_API.findall(message_text)
     if lookup_matches:
-        from external_data_manager.helpers import (
-            scryfall_search,
-        )
-        from .helpers import flex_json_card_image_with_price, carousel
+        from external_data_manager.helpers import scryfall_search
+
+        from .helpers import carousel, flex_json_card_image_with_price
 
         card_images = []
         card_alts = []

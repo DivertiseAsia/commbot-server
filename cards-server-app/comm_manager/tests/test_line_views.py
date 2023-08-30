@@ -1,7 +1,7 @@
 import time
 from unittest.mock import MagicMock, call, patch
 
-from comm_manager.models import Chat, ChatMembership, ChatUser
+from comm_manager.models import Chat, ChatMembership, ChatMessage, ChatUser
 from comm_manager.views import (
     handle_followevent,
     handle_joinevent,
@@ -13,7 +13,7 @@ from comm_manager.views import (
 )
 from config.helpers import BaseTestCase
 from django.utils import timezone
-from linebot.models import SourceGroup, SourceUser, TextSendMessage
+from linebot.models import SourceGroup, SourceUser
 
 
 class TestLineViews(BaseTestCase):
@@ -446,4 +446,63 @@ class TestLineViews(BaseTestCase):
 
         self.assertNotEquals(
             memberships.first().ended_date, memberships.last().ended_date
+        )
+
+    def test_message_in_group_chat_saved_as_message(self):
+        message = "hi"
+        user_id = "abc"
+        group_id = "groupA"
+        event = self.given_message_event_in_group(message, user_id, group_id)
+
+        handle_message(event)
+
+        related_chat = Chat.objects.get(external_id=group_id)
+        related_user = ChatUser.objects.get(external_id=user_id)
+
+        cm = ChatMessage.objects.get(chat=related_chat, chat_user=related_user)
+        self.assertEquals(cm.message, message)
+
+        second_message = "this is number two"
+        event_two = self.given_message_event_in_group(second_message, user_id, group_id)
+        handle_message(event_two)
+
+        self.assertEquals(
+            2,
+            ChatMessage.objects.filter(
+                chat=related_chat, chat_user=related_user
+            ).count(),
+        )
+        self.assertTrue(
+            ChatMessage.objects.filter(
+                chat=related_chat, chat_user=related_user, message=second_message
+            ).exists()
+        )
+
+    def test_message_in_one_on_one_chat_saved_as_message(self):
+        message = "hi"
+        user_id = "abc"
+        event = self.given_message_event(message, user_id)
+
+        handle_message(event)
+
+        related_chat = Chat.objects.get(external_id=user_id)
+        related_user = ChatUser.objects.get(external_id=user_id)
+
+        cm = ChatMessage.objects.get(chat=related_chat, chat_user=related_user)
+        self.assertEquals(cm.message, message)
+
+        second_message = "this is number two"
+        event_two = self.given_message_event(second_message, user_id)
+        handle_message(event_two)
+
+        self.assertEquals(
+            2,
+            ChatMessage.objects.filter(
+                chat=related_chat, chat_user=related_user
+            ).count(),
+        )
+        self.assertTrue(
+            ChatMessage.objects.filter(
+                chat=related_chat, chat_user=related_user, message=second_message
+            ).exists()
         )

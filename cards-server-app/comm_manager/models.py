@@ -1,7 +1,8 @@
 import uuid
+from typing import Any, Tuple
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from typing import Any, Tuple
 
 
 class ChatUser(models.Model):
@@ -53,3 +54,9 @@ class ChatMembership(models.Model):
     ended_date = models.DateTimeField(blank=True, null=True)
 
     objects = ChatMembershipManager()
+
+
+class ChatMessage(models.Model):
+    chat_user = models.ForeignKey(ChatUser, null=True, on_delete=models.SET_NULL)
+    chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
+    message = models.TextField()
