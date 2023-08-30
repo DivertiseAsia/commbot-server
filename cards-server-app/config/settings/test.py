@@ -9,7 +9,9 @@ SECRET_KEY = "TEST_DJANGO_SECRET_KEY"
 DEBUG = True
 
 TESTING = True
+
 CELERY_ALWAYS_EAGER = True  # so celery does not error
+CELERY_RESULT_BACKEND = "file:///var/celery/results"
 
 DATABASES = {
     "default": {
