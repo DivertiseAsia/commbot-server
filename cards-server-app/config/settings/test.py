@@ -1,5 +1,7 @@
 from .base import *
 
+ALLOWED_HOSTS = ["localhost", "testserver"]
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "TEST_DJANGO_SECRET_KEY"
 
