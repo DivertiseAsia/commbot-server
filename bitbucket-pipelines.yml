@@ -7,6 +7,8 @@ definitions:
         POSTGRES_DB: "circle_test"
         POSTGRES_USER: "ubuntu"
         POSTGRES_PASSWORD: "test"
+    redis:
+      image: redis
   steps:
     - step: &install-build
         name: Install & Test
@@ -33,6 +35,7 @@ definitions:
           - cards-server-app/application.tar.gz
         services:
           - postgres
+          - redis
     - step: &deployheroku
         name: Default Deploy
         script:
