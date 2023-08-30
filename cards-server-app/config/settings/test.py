@@ -11,7 +11,8 @@ DEBUG = True
 TESTING = True
 
 CELERY_ALWAYS_EAGER = True  # so celery does not error
-CELERY_RESULT_BACKEND = "file:///tmp"
+CELERY_BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
 
 DATABASES = {
     "default": {
