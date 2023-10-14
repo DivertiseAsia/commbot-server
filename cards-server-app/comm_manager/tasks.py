@@ -1,6 +1,6 @@
-from comm_manager.apis import handler, line_bot_api
-from comm_manager.models import ChatUser, ChatMembership, Chat
 from celery import shared_task
+from comm_manager.apis import line_bot_api
+from comm_manager.models import Chat, ChatUser
 from django.utils import timezone
 
 
