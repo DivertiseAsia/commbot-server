@@ -60,3 +60,4 @@ class ChatMessage(models.Model):
     chat_user = models.ForeignKey(ChatUser, null=True, on_delete=models.SET_NULL)
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
     message = models.TextField()
+    received_date = models.DateTimeField(_("Received Date"), auto_now_add=True)
