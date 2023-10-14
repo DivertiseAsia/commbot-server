@@ -15,6 +15,20 @@ class Event(models.Model):
     def __str__(self):
         return f"{self.name} on {self.date} @ {self.venue_name}"
 
+    def serialize_as_text(self):
+        participants = self.participant_set.all()
+
+        serialized_participants = "\n".join(
+            [
+                f"{idx + 1}. {participant}"
+                for idx, participant in enumerate(participants)
+            ]
+        )
+        formatted_datetime = self.date.strftime("%Y-%m-%d")
+        if self.time:
+            formatted_datetime += " " + self.time.strftime("%H:%M")
+        return f"{self.name} on {formatted_datetime} @ {self.venue_name}\n{serialized_participants}"
+
 
 class Participant(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
