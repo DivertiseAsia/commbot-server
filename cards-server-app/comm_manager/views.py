@@ -2,6 +2,7 @@ import json
 import logging
 import re
 import time
+from datetime import datetime
 from urllib.parse import quote
 
 from comm_manager.apis import handler, line_bot_api
@@ -11,6 +12,7 @@ from django.contrib.sites.models import Site
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from event_manager.models import Event
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (
     FlexSendMessage,
@@ -178,6 +180,14 @@ def handle_message(event):
                 alt_text=", ".join(card_alts),
                 contents=carousel(card_images),
             ),
+        )
+    elif message_text == "!events":
+        eqs = Event.objects.filter(date__gte=datetime.today().date()).order_by("date")
+        event_list = []
+        for e in eqs:
+            event_list.append(str(e))
+        line_bot_api.reply_message(
+            event.reply_token, TextSendMessage(text="\n".join(event_list))
         )
     elif chat.is_mirrorreply_feature_on:
         line_bot_api.reply_message(

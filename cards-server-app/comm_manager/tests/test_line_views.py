@@ -1,4 +1,5 @@
 import time
+from datetime import datetime, timedelta
 from unittest.mock import MagicMock, call, patch
 
 from comm_manager.models import Chat, ChatMembership, ChatMessage, ChatUser
@@ -13,7 +14,8 @@ from comm_manager.views import (
 )
 from config.helpers import BaseTestCase
 from django.utils import timezone
-from linebot.models import SourceGroup, SourceUser
+from event_manager.models import Event
+from linebot.models import SourceGroup, SourceUser, TextSendMessage
 
 
 class TestLineViews(BaseTestCase):
@@ -62,6 +64,10 @@ class TestLineViews(BaseTestCase):
             },
             undefined,
         )
+
+    def assertMockRepliedWith(self, mock, message):
+        called_args, _ = mock.call_args
+        self.assertEqual(called_args[1], message)
 
     def test_user_follows_bot_first_time_creates_chat(self):
         self.assertEquals(0, Chat.objects.filter(external_id="abc").count())
@@ -290,6 +296,29 @@ class TestLineViews(BaseTestCase):
         handle_message(event)
 
         assert not mock.called
+
+    @patch("comm_manager.apis.line_bot_api.reply_message")
+    def test_user_normal_messages_bot_if_event_sends_events(self, mock):
+        event_future = Event.objects.create(
+            name="test2", date=datetime.today().date() + timedelta(hours=24)
+        )
+        event_today = Event.objects.create(name="test1", date=datetime.today().date())
+
+        event_past = Event.objects.create(
+            name="test3", date=datetime.today().date() - timedelta(hours=24)
+        )
+        c = Chat.objects.create(
+            external_id="abc",
+            chat_type=Chat.ChatType.INDIVIDUAL,
+            is_mirrorreply_feature_on=False,
+        )
+        c.save()
+        event = self.given_message_event("!events", "abc")
+        handle_message(event)
+
+        self.assertMockRepliedWith(
+            mock, TextSendMessage(text=str(event_today) + "\n" + str(event_future))
+        )
 
     def test_new_person_joins_group_chat_they_have_first_membership(self):
         given_user_id = "abc"
