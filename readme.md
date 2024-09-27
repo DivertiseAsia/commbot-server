@@ -1,3 +1,7 @@
+# Commbot Server
+
+This project uses playwright to respond to line messages with content about Magic cards
+
 # Deployment Setup
 
 ## Celery Locally
